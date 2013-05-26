@@ -4,18 +4,15 @@ event _SpecDone {
   integer id;
 }
 
-event _SuiteStart {}
-
-event Suite {
-  action describe(string text) returns integer {
-    _init();
+event SuiteRunner {
+  action addContext(string text) returns integer {
     _incrCount();
     _exampleRoots.append(_counter);
     _examplesTree.add(_counter, new sequence<integer>);
     return _counter;
   }
 
-  action it(string text) returns integer {
+  action addSpec(string text) returns integer {
     _incrCount();
     _examplesTree[_currRunningCounter].append(_counter);
     return _counter;
@@ -23,24 +20,12 @@ event Suite {
 
   action run(action<> runnable) {
     _entryPoint := runnable;
-    spawn _run;
+    spawn _doSpawn;
   }
 
-  action pass() {
-    route _SpecDone(_currRunningCounter);
-  }
-
-  action _run() {
+  action _doSpawn() {
     _entryPoint();
-    route _SuiteStart();
-  }
-
-  action _init() {
-    if _initialized then { return; }
-    _initialized := true;
-    on _SuiteStart() {
-      _runRoot();
-    }
+    _runRoot();
   }
 
   action _incrCount() {
@@ -54,6 +39,7 @@ event Suite {
       _runFirstExample(_currRunningCounter);
     }
   }
+
   action _runFirstExample(integer rootId) {
     integer exampleId := _examplesTree[rootId][0];
     _currRunningCounter := exampleId;
@@ -82,9 +68,28 @@ event Suite {
   }
 
   wildcard action<> _entryPoint;
-  wildcard boolean _initialized;
   wildcard integer _counter;
   wildcard integer _currRunningCounter;
   wildcard sequence<integer> _exampleRoots;
   wildcard dictionary<integer, sequence<integer> > _examplesTree;
+}
+
+event Suite {
+  action describe(string text) returns integer {
+    return _runner.addContext(text);
+  }
+
+  action it(string text) returns integer {
+    return _runner.addSpec(text);
+  }
+
+  action run(action<> runnable) {
+    _runner.run(runnable);
+  }
+
+  action pass() {
+    route _SpecDone(_runner._currRunningCounter);
+  }
+
+  SuiteRunner _runner;
 }
