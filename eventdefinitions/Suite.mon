@@ -1,0 +1,90 @@
+package com.dtamai.onspec;
+
+event _SpecDone {
+  integer id;
+}
+
+event _SuiteStart {}
+
+event Suite {
+  action describe(string text) returns integer {
+    _init();
+    _incrCount();
+    _exampleRoots.append(_counter);
+    _examplesTree.add(_counter, new sequence<integer>);
+    return _counter;
+  }
+
+  action it(string text) returns integer {
+    _incrCount();
+    _examplesTree[_currRunningCounter].append(_counter);
+    return _counter;
+  }
+
+  action run(action<> runnable) {
+    _entryPoint := runnable;
+    spawn _run;
+  }
+
+  action pass() {
+    route _SpecDone(_currRunningCounter);
+  }
+
+  action _run() {
+    _entryPoint();
+    route _SuiteStart();
+  }
+
+  action _init() {
+    if _initialized then { return; }
+    _initialized := true;
+    on _SuiteStart() {
+      _runRoot();
+    }
+  }
+
+  action _incrCount() {
+    _counter := _counter + 1;
+  }
+
+  action _runRoot() {
+    _currRunningCounter := _exampleRoots[0];
+    route Spec(_currRunningCounter);
+    on completed Spec(_currRunningCounter) {
+      _runFirstExample(_currRunningCounter);
+    }
+  }
+  action _runFirstExample(integer rootId) {
+    integer exampleId := _examplesTree[rootId][0];
+    _currRunningCounter := exampleId;
+    route Spec(exampleId);
+    if _examplesTree[rootId].size() > 1 then {
+      on _SpecDone(exampleId) {
+        _runNextExample(rootId, 1);
+      }
+    }
+  }
+
+  action _runNextExample(integer rootId, integer exampleIdx) {
+    integer exampleId := _examplesTree[rootId][exampleIdx];
+    _currRunningCounter := exampleId;
+    route Spec(exampleId);
+    on _SpecDone(exampleId) {
+      if _examplesTree[rootId].size() > exampleIdx + 1 then {
+        _runNextExample(rootId, exampleIdx + 1);
+      } else {
+        _exampleRoots.remove(0);
+        if _exampleRoots.size() > 0 then {
+          _runRoot();
+        }
+      }
+    }
+  }
+
+  wildcard action<> _entryPoint;
+  wildcard boolean _initialized;
+  wildcard integer _counter;
+  wildcard integer _currRunningCounter;
+  wildcard sequence<integer> _exampleRoots;
+  wildcard dictionary<integer, sequence<integer> > _examplesTree;
+}
