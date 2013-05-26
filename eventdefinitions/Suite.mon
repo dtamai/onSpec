@@ -8,14 +8,21 @@ event SuiteRunner {
   action addContext(string text) returns integer {
     _incrCount();
     _exampleRoots.append(_counter);
+    _exampleRootsTags.append(_currTags);
     _examplesTree.add(_counter, new sequence<integer>);
+    _currTags := "";
     return _counter;
   }
 
   action addSpec(string text) returns integer {
     _incrCount();
     _examplesTree[_currRunningCounter].append(_counter);
+    _currTags := "";
     return _counter;
+  }
+
+  action addTags(string tags) {
+    _currTags := tags;
   }
 
   action run(action<> runnable) {
@@ -69,8 +76,10 @@ event SuiteRunner {
 
   wildcard action<> _entryPoint;
   wildcard integer _counter;
+  wildcard string _currTags;
   wildcard integer _currRunningCounter;
   wildcard sequence<integer> _exampleRoots;
+  wildcard sequence<string> _exampleRootsTags;
   wildcard dictionary<integer, sequence<integer> > _examplesTree;
 }
 
@@ -81,6 +90,10 @@ event Suite {
 
   action it(string text) returns integer {
     return _runner.addSpec(text);
+  }
+
+  action T(string tags) {
+    _runner.addTags(tags);
   }
 
   action run(action<> runnable) {
