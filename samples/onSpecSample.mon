@@ -1,0 +1,52 @@
+package com.dtamai.onspec;
+
+// Injecting this file should print '[GOOD] Working as expected' in the console
+//
+// It's just a tracing bullet for a real spec monitor, to verify if the syntax is 
+// clean enough. It completely skips the 'assertion' part of the spec, instead it 
+// routes an event so that the helper monitor can assert that the specs were 
+// called.
+
+event SampleResponse {
+  string text;
+}
+
+monitor onSpecSampleHelper {
+  action onload() {
+    on SampleResponse("it helped") and
+      SampleResponse("upto now it's working") and
+      SampleResponse("it did") {
+        print "[GOOD] Working as expected";
+      }
+  }
+}
+
+monitor onSpecSample {
+  Suite $;
+
+  action onload() {
+    $.run(run);
+  }
+
+  action run() {
+    on spec($.describe("First example")) {
+      on spec($.it("helps understand the order of evaluation")) {
+        route SampleResponse("it helped");
+        $.pass();
+      }
+
+      on spec($.it("gives new ideas for a purer EPL testing suite")) {
+        route SampleResponse("upto now it's working");
+        $.pass();
+      }
+    }
+
+    on spec($.describe("The second example")) {
+      on spec($.it("extends the understanding")) {
+        route SampleResponse("it did");
+        $.pass();
+      }
+    }
+  }
+}
+
