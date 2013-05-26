@@ -1,0 +1,5 @@
+package com.dtamai.onspec;
+
+event Spec {
+  integer id;
+}
