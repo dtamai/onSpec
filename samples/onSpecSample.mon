@@ -29,20 +29,20 @@ monitor onSpecSample {
   }
 
   action run() {
-    on spec($.describe("First example")) {
-      on spec($.it("helps understand the order of evaluation")) {
+    on Spec($.describe("First example")) {
+      on Spec($.it("helps understand the order of evaluation")) {
         route SampleResponse("it helped");
         $.pass();
       }
 
-      on spec($.it("gives new ideas for a purer EPL testing suite")) {
+      on Spec($.it("gives new ideas for a purer EPL testing suite")) {
         route SampleResponse("upto now it's working");
         $.pass();
       }
     }
 
-    on spec($.describe("The second example")) {
-      on spec($.it("extends the understanding")) {
+    on Spec($.describe("The second example")) {
+      on Spec($.it("extends the understanding")) {
         route SampleResponse("it did");
         $.pass();
       }
