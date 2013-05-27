@@ -2,6 +2,7 @@ package com.dtamai.onspec;
 
 
 event Suite {
+  SuiteRunner _runner;
   action describe(string text) returns integer {
     return _runner.addContext(text);
   }
@@ -19,8 +20,56 @@ event Suite {
   }
 
   action pass() {
+    //TODO: report success
+    done();
+  }
+
+  action skip() {
+    //TODO: report skipped spec
+    done();
+  }
+
+  action fail(string reason) {
+    //TODO: report failure
+    done();
+  }
+
+  action done() {
     route _SpecDone(_runner._currRunningCounter);
   }
 
-  SuiteRunner _runner;
+  action assertTrue(boolean test) {
+    //TODO: report counter
+    _AssertionBoolean r := new _AssertionBoolean;
+    r.actual := test;
+    r.eq(true);
+  }
+
+  action assertBoolean(boolean actual) returns _AssertionBoolean {
+    //TODO: report counter
+    _AssertionBoolean r := new _AssertionBoolean;
+    r.actual := actual;
+    return r;
+  }
+
+  action assertInteger(integer actual) returns _AssertionInteger {
+    //TODO: report counter
+    _AssertionInteger r := new _AssertionInteger;
+    r.actual := actual;
+    return r;
+  }
+
+  action assertFloat(float actual) returns _AssertionFloatRelative {
+    //TODO: report counter
+    _AssertionFloatRelative r := new _AssertionFloatRelative;
+    r.actual := actual;
+    return r;
+  }
+
+  action assertString(string actual) returns _AssertionString {
+    //TODO: report counter
+    _AssertionString r := new _AssertionString;
+    r.actual := actual;
+    return r;
+  }
 }

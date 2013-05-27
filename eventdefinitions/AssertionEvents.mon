@@ -1,0 +1,6 @@
+package com.dtamai.onspec;
+
+event Failure {
+  wildcard string reason;
+}
+

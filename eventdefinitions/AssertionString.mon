@@ -1,0 +1,22 @@
+package com.dtamai.onspec;
+
+event _AssertionString {
+  wildcard string actual;
+
+  action testFailed(string expected, string expectation) {
+    string reason := "\"" + actual + "\" expected to " + expectation + " \"" + expected + "\"";
+    route Failure(reason);
+  }
+
+  action eq(string expected) {
+    if not (expected = actual) then {
+      testFailed(expected, "be equal");
+    }
+  }
+
+  action neq(string expected) {
+    if not (expected != actual) then {
+      testFailed(expected, "be not equal");
+    }
+  }
+}

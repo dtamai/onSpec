@@ -1,0 +1,46 @@
+package com.dtamai.onspec;
+
+event _AssertionInteger {
+  wildcard integer actual;
+
+  action testFailed(integer expected, string expectation) {
+    string reason := actual.toString() + " expected to be " + expectation + " " + expected.toString();
+    route Failure(reason);
+  }
+
+  action eq(integer expected) {
+    if not (expected = actual) then {
+      testFailed(expected, "equal");
+    }
+  }
+
+  action neq(integer expected) {
+    if not (expected != actual) then {
+      testFailed(expected, "not equal");
+    }
+  }
+
+  action gt(integer boundary) {
+    if not (boundary < actual) then {
+      testFailed(boundary, "greater than");
+    }
+  }
+
+  action lt(integer boundary) {
+    if not (boundary > actual) then {
+      testFailed(boundary, "less than");
+    }
+  }
+
+  action gte(integer boundary) {
+    if not (boundary <= actual) then {
+      testFailed(boundary, "greater than or equal");
+    }
+  }
+
+  action lte(integer boundary) {
+    if not (boundary >= actual) then {
+      testFailed(boundary, "less than or equal");
+    }
+  }
+}

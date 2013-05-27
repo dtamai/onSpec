@@ -1,0 +1,30 @@
+package com.dtamai.onspec;
+
+event _AssertionBoolean {
+  wildcard boolean actual;
+
+  action testFailed(boolean expected, string expectation) {
+    string sep;
+    if expectation.length() = 0 then {
+      sep := "";
+    } else {
+      sep := " ";
+    }
+
+    string reason := actual.toString() + " expected to be " + 
+                     expectation + sep + expected.toString();
+    route Failure(reason);
+  }
+
+  action eq(boolean expected) {
+    if not (expected = actual) then {
+      testFailed(expected, "");
+    }
+  }
+
+  action neq(boolean expected) {
+    if not (expected != actual) then {
+      testFailed(expected, "not");
+    }
+  }
+}
