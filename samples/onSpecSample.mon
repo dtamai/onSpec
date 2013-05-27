@@ -48,16 +48,12 @@ monitor onSpecSample {
       }
     }
 
+    $.T("slow");
     on Spec($.describe("The third example")) {
-
-      $.T("deep");
-      on Spec($.describe("#deep")) {
-        on Spec($.it("has also has something to say")) {
-          route SampleResponse(". . . ");
-          $.pass();
-        }
+      on Spec($.it("has also has something to say")) {
+        route SampleResponse(". . . ");
+        $.pass();
       }
-
     }
   }
 }
