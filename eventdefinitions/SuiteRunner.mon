@@ -27,16 +27,20 @@ event SuiteRunner {
 
   action run(action<> runnable) {
     _entryPoint := runnable;
-    spawn _doSpawn;
-  }
-
-  action _doSpawn() {
-    _entryPoint();
-    _runRoot();
+    _doSpawn();
   }
 
   action _incrCount() {
     _counter := _counter + 1;
+  }
+
+  action _doSpawn() {
+    spawn _runEntry;
+  }
+
+  action _runEntry() {
+    _entryPoint();
+    _runRoot();
   }
 
   action _runRoot() {
