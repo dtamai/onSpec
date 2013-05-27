@@ -30,6 +30,10 @@ event SuiteRunner {
     _doSpawn();
   }
 
+  action getCurrentSpec() returns integer {
+    return _currRunningCounter;
+  }
+
   action _incrCount() {
     _counter := _counter + 1;
   }

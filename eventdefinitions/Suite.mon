@@ -35,7 +35,7 @@ event Suite {
   }
 
   action done() {
-    route _SpecDone(_runner._currRunningCounter);
+    route _SpecDone(_runner.getCurrentSpec());
   }
 
   action assertTrue(boolean test) {
