@@ -2,7 +2,7 @@ package com.dtamai.onspec;
 
 
 event Suite {
-  SuiteRunner _runner;
+  SpecRunner _runner;
   action describe(string text) returns integer {
     return _runner.addContext(text);
   }

@@ -4,7 +4,7 @@ event _SpecDone {
   integer id;
 }
 
-event SuiteRunner {
+event SpecRunner {
   action addContext(string text) returns integer {
     _incrCount();
     _exampleRoots.append(_counter);
