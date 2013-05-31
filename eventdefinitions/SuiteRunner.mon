@@ -1,0 +1,34 @@
+﻿package com.dtamai.onspec;
+
+monitor SuiteRunner {
+  sequence<integer> specs := [];
+
+  action onload() {
+    on all NewSuite() {
+      spawn handleNewSuite;
+    }
+  }
+
+  action handleNewSuite() {
+    route _SpecDiscover();
+
+    _SpecPresent spec;
+    listener disc := on all _SpecPresent():spec {
+      specs.append(spec.id);
+    }
+
+    on completed _SpecDiscover() {
+      disc.quit();
+      runSpec();
+    }
+  }
+
+  action runSpec() {
+    if specs.size() <= 0 then { return; }
+
+    integer currId := specs[0];
+    route _SpecBegin(currId);
+    on _SpecEnd(currId) runSpec;
+  }
+}
+
