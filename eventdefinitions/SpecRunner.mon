@@ -5,6 +5,8 @@ event _SpecDone {
 }
 
 event SpecRunner {
+  wildcard integer _specId;
+
   action addContext(string text) returns integer {
     _incrCount();
     _exampleRoots.append(_counter);
@@ -26,6 +28,7 @@ event SpecRunner {
   }
 
   action run(action<> runnable, integer specId) {
+    self._specId := specId;
     _entryPoint := runnable;
     _doSpawn();
   }
@@ -51,32 +54,24 @@ event SpecRunner {
     _currRunningCounter := _exampleRoots[0];
     route Spec(_currRunningCounter);
     on completed Spec(_currRunningCounter) {
-      _runFirstExample(_currRunningCounter);
+      _runExample(_currRunningCounter);
     }
   }
 
-  action _runFirstExample(integer rootId) {
+  action _runExample(integer rootId) {
     integer exampleId := _examplesTree[rootId][0];
     _currRunningCounter := exampleId;
     route Spec(exampleId);
-    if _examplesTree[rootId].size() > 1 then {
-      on _SpecDone(exampleId) {
-        _runNextExample(rootId, 1);
-      }
-    }
-  }
-
-  action _runNextExample(integer rootId, integer exampleIdx) {
-    integer exampleId := _examplesTree[rootId][exampleIdx];
-    _currRunningCounter := exampleId;
-    route Spec(exampleId);
     on _SpecDone(exampleId) {
-      if _examplesTree[rootId].size() > exampleIdx + 1 then {
-        _runNextExample(rootId, exampleIdx + 1);
+      _examplesTree[rootId].remove(0);
+      if _examplesTree[rootId].size() > 0 then {
+        _runExample(rootId);
       } else {
         _exampleRoots.remove(0);
         if _exampleRoots.size() > 0 then {
           _runRoot();
+        } else {
+          route _SpecEnd(self._specId);
         }
       }
     }
