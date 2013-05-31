@@ -4,3 +4,25 @@ event Spec {
   integer id;
 }
 
+event _SpecBegin {
+  integer id;
+}
+
+event _SpecEnd {
+  integer id;
+}
+
+event _SpecDiscover {
+}
+
+event _SpecPresent {
+  wildcard integer id;
+}
+
+event NewSuite {
+}
+
+event _SpecDone {
+  integer id;
+}
+

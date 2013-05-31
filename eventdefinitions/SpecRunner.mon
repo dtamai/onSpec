@@ -1,9 +1,5 @@
 package com.dtamai.onspec;
 
-event _SpecDone {
-  integer id;
-}
-
 event SpecRunner {
   wildcard integer _specId;
 
