@@ -25,7 +25,7 @@ event SpecRunner {
     _currTags := tags;
   }
 
-  action run(action<> runnable) {
+  action run(action<> runnable, integer specId) {
     _entryPoint := runnable;
     _doSpawn();
   }

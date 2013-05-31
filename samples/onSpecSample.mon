@@ -25,7 +25,7 @@ monitor onSpecSample {
   Suite $;
 
   action onload() {
-    $.run(run);
+    $.init(run);
   }
 
   action run() {

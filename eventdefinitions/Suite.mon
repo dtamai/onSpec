@@ -1,7 +1,25 @@
 package com.dtamai.onspec;
 
+event _SpecBegin {
+  integer id;
+}
+
+event _SpecEnd {
+  integer id;
+}
+
+event _SpecDiscover {
+}
+
+event _SpecPresent {
+  wildcard integer id;
+}
+
+event NewSuite {
+}
 
 event Suite {
+  wildcard integer _id;
   SpecRunner _runner;
   action describe(string text) returns integer {
     return _runner.addContext(text);
@@ -15,8 +33,18 @@ event Suite {
     _runner.addTags(tags);
   }
 
-  action run(action<> runnable) {
-    _runner.run(runnable);
+  action init(action<> runnable) {
+    self._id := integer.getUnique();
+    on all NewSuite() -> _SpecDiscover() {
+      spawn _handleNewSuite(runnable);
+    }
+  }
+
+  action _handleNewSuite(action<> runnable) {
+    route _SpecPresent(self._id);
+    on _SpecBegin(_id) {
+      _runner.run(runnable, self._id);
+    }
   }
 
   action pass() {
