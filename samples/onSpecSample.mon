@@ -15,7 +15,8 @@ monitor onSpecSampleHelper {
   action onload() {
     on SampleResponse("it helped") and
       SampleResponse("upto now it's working") and
-      SampleResponse("it did") {
+      SampleResponse("it did") and
+      SampleResponse(". . .") {
         print "[GOOD] Working as expected";
       }
   }
@@ -51,10 +52,32 @@ monitor onSpecSample {
     $.T("slow");
     on Spec($.describe("The third example")) {
       on Spec($.it("has also has something to say")) {
-        route SampleResponse(". . . ");
+        route SampleResponse(". . .");
         $.pass();
       }
     }
+  }
+}
+
+monitor onSpecSample2 {
+  Suite _;
+
+  action onload() {
+    _.init(run);
+  }
+
+  action run() {
+    on Spec(_.describe("Another monitor")) {
+      on Spec(_.it("verifies two monitors can run")) {
+        _.pass();
+      }
+    }
+  }
+}
+
+monitor Go {
+  action onload() {
+    route NewSuite();
   }
 }
 
