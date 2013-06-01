@@ -1,24 +1,22 @@
 package com.dtamai.onspec;
 
 event SpecRunner {
-  wildcard integer _specId;
+  integer _specId;
 
-  dictionary<integer, _ContextDescription> __contexts;
   action addContext(string text) returns integer {
     _incrCount();
-    __contexts[_counter] := _ContextDescription(_counter, text, __currContext.contexts.clone());
-    _exampleRoots.append(_counter);
+    __contexts[_counter] := _ContextDescription(_counter, text, __currContext.parentContexts.clone());
+    _pendingContextsId.append(_counter);
     _exampleRootsTags.append(_currTags);
-    _examplesTree.add(_counter, new sequence<integer>);
+    _pendingExamplesIdByContext.add(_counter, new sequence<integer>);
     _currTags := "";
     return _counter;
   }
 
-  dictionary<integer, _SpecDescription> __examples;
   action addSpec(string text) returns integer {
     _incrCount();
-    __examples[_counter] := _SpecDescription(_counter, text, __currContext.contexts.clone());
-    _examplesTree[_currRunningCounter].append(_counter);
+    __examples[_counter] := _SpecDescription(_counter, text, __currContext.parentContexts.clone());
+    _pendingExamplesIdByContext[_cursor].append(_counter);
     _currTags := "";
     return _counter;
   }
@@ -34,7 +32,7 @@ event SpecRunner {
   }
 
   action getCurrentSpec() returns integer {
-    return _currRunningCounter;
+    return _cursor;
   }
 
   action _incrCount() {
@@ -45,23 +43,20 @@ event SpecRunner {
     spawn _runEntry;
   }
 
-  _ContextDescription __currContext;
   action _runEntry() {
-    __currContext := new _ContextDescription;
-    __currContext.id := _specId;
-    __currContext.contexts := [_specId];
+    __currContext := _createRootContext(self._specId);
     _entryPoint();
-    _runRoot();
+    _runContext();
   }
 
-  action _runRoot() {
-    if _exampleRoots.size() > 0 then {
-      _currRunningCounter := _exampleRoots[0];
-      __currContext := __contexts[_currRunningCounter];
-      __currContext.contexts.append(_currRunningCounter);
-      route Spec(_currRunningCounter);
-      on completed Spec(_currRunningCounter) {
-        _runExample(_currRunningCounter);
+  action _runContext() {
+    if _pendingContextsId.size() > 0 then {
+      _cursor := _pendingContextsId[0];
+      _updateCurrentContext(_cursor);
+
+      route Spec(_cursor);
+      on completed Spec(_cursor) {
+        _runExample(_cursor);
       }
     } else {
       route _SpecEnd(self._specId);
@@ -70,25 +65,41 @@ event SpecRunner {
   }
 
   action _runExample(integer rootId) {
-    integer exampleId := _examplesTree[rootId][0];
-    _currRunningCounter := exampleId;
+    integer exampleId := _pendingExamplesIdByContext[rootId][0];
+    _cursor := exampleId;
     route Spec(exampleId);
     on _SpecDone(exampleId) {
-      _examplesTree[rootId].remove(0);
-      if _examplesTree[rootId].size() > 0 then {
+      _pendingExamplesIdByContext[rootId].remove(0);
+      if _pendingExamplesIdByContext[rootId].size() > 0 then {
         _runExample(rootId);
       } else {
-        _exampleRoots.remove(0);
-        _runRoot();
+        _pendingContextsId.remove(0);
+        _runContext();
       }
     }
   }
 
-  wildcard action<> _entryPoint;
-  wildcard integer _counter;
-  wildcard string _currTags;
-  wildcard integer _currRunningCounter;
-  wildcard sequence<integer> _exampleRoots;
-  wildcard sequence<string> _exampleRootsTags;
-  wildcard dictionary<integer, sequence<integer> > _examplesTree;
+  action _createRootContext(integer id) returns _ContextDescription {
+    _ContextDescription c := new _ContextDescription;
+    c.id := id;
+    c.parentContexts := [id];
+    return c;
+  }
+
+  action _updateCurrentContext(integer id) {
+    __currContext := __contexts[id];
+    __currContext.parentContexts.append(id);
+  }
+
+  action<> _entryPoint;
+  integer _counter;
+  string _currTags;
+  integer _cursor;
+  sequence<integer> _pendingContextsId;
+  sequence<string> _exampleRootsTags;
+  dictionary<integer, sequence<integer> > _pendingExamplesIdByContext;
+  dictionary<integer, _ContextDescription> __contexts;
+  dictionary<integer, _SpecDescription> __examples;
+  _ContextDescription __currContext;
+  chunk __deadWeight;
 }

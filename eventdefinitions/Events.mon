@@ -29,11 +29,11 @@ event _SpecDone {
 event _ContextDescription {
   wildcard integer id;
   wildcard string text;
-  wildcard sequence<integer> contexts;
+  wildcard sequence<integer> parentContexts;
 }
 
 event _SpecDescription {
   wildcard integer id;
   wildcard string text;
-  wildcard sequence<integer> contexts;
+  wildcard sequence<integer> parentContexts;
 }
