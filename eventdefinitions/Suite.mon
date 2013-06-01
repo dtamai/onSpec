@@ -30,17 +30,17 @@ event Suite {
   }
 
   action pass() {
-    //TODO: report success
+    route Success();
     done();
   }
 
   action skip() {
-    //TODO: report skipped spec
+    route Skip();
     done();
   }
 
   action fail(string reason) {
-    //TODO: report failure
+    route Failure(reason);
     done();
   }
 
