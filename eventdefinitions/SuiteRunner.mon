@@ -28,7 +28,10 @@ monitor SuiteRunner {
 
     integer currId := specs[0];
     route _SpecBegin(currId);
-    on _SpecEnd(currId) runSpec;
+    on _SpecEnd(currId) {
+      specs.remove(0);
+      runSpec();
+    }
   }
 }
 

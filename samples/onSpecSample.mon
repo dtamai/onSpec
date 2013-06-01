@@ -16,7 +16,8 @@ monitor onSpecSampleHelper {
     on SampleResponse("it helped") and
       SampleResponse("upto now it's working") and
       SampleResponse("it did") and
-      SampleResponse(". . .") {
+      SampleResponse(". . .") and
+      SampleResponse("and they are!") {
         print "[GOOD] Working as expected";
       }
   }
@@ -69,6 +70,7 @@ monitor onSpecSample2 {
   action run() {
     on Spec(_.describe("Another monitor")) {
       on Spec(_.it("verifies two monitors can run")) {
+        route SampleResponse("and they are!");
         _.pass();
       }
     }

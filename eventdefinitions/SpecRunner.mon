@@ -47,10 +47,15 @@ event SpecRunner {
   }
 
   action _runRoot() {
-    _currRunningCounter := _exampleRoots[0];
-    route Spec(_currRunningCounter);
-    on completed Spec(_currRunningCounter) {
-      _runExample(_currRunningCounter);
+    if _exampleRoots.size() > 0 then {
+      _currRunningCounter := _exampleRoots[0];
+      route Spec(_currRunningCounter);
+      on completed Spec(_currRunningCounter) {
+        _runExample(_currRunningCounter);
+      }
+    } else {
+      route _SpecEnd(self._specId);
+      die;
     }
   }
 
@@ -64,11 +69,7 @@ event SpecRunner {
         _runExample(rootId);
       } else {
         _exampleRoots.remove(0);
-        if _exampleRoots.size() > 0 then {
-          _runRoot();
-        } else {
-          route _SpecEnd(self._specId);
-        }
+        _runRoot();
       }
     }
   }
