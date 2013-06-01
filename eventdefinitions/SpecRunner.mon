@@ -3,8 +3,10 @@ package com.dtamai.onspec;
 event SpecRunner {
   wildcard integer _specId;
 
+  dictionary<integer, _ContextDescription> __contexts;
   action addContext(string text) returns integer {
     _incrCount();
+    __contexts[_counter] := _ContextDescription(_counter, text, __currContext.contexts.clone());
     _exampleRoots.append(_counter);
     _exampleRootsTags.append(_currTags);
     _examplesTree.add(_counter, new sequence<integer>);
@@ -12,8 +14,10 @@ event SpecRunner {
     return _counter;
   }
 
+  dictionary<integer, _SpecDescription> __examples;
   action addSpec(string text) returns integer {
     _incrCount();
+    __examples[_counter] := _SpecDescription(_counter, text, __currContext.contexts.clone());
     _examplesTree[_currRunningCounter].append(_counter);
     _currTags := "";
     return _counter;
@@ -34,14 +38,18 @@ event SpecRunner {
   }
 
   action _incrCount() {
-    _counter := _counter + 1;
+    _counter := integer.getUnique();
   }
 
   action _doSpawn() {
     spawn _runEntry;
   }
 
+  _ContextDescription __currContext;
   action _runEntry() {
+    __currContext := new _ContextDescription;
+    __currContext.id := _specId;
+    __currContext.contexts := [_specId];
     _entryPoint();
     _runRoot();
   }
@@ -49,6 +57,8 @@ event SpecRunner {
   action _runRoot() {
     if _exampleRoots.size() > 0 then {
       _currRunningCounter := _exampleRoots[0];
+      __currContext := __contexts[_currRunningCounter];
+      __currContext.contexts.append(_currRunningCounter);
       route Spec(_currRunningCounter);
       on completed Spec(_currRunningCounter) {
         _runExample(_currRunningCounter);

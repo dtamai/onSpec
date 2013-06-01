@@ -26,3 +26,14 @@ event _SpecDone {
   integer id;
 }
 
+event _ContextDescription {
+  wildcard integer id;
+  wildcard string text;
+  wildcard sequence<integer> contexts;
+}
+
+event _SpecDescription {
+  wildcard integer id;
+  wildcard string text;
+  wildcard sequence<integer> contexts;
+}

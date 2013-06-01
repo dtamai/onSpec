@@ -39,9 +39,11 @@ monitor onSpecSample {
         $.pass();
       }
 
-      on Spec($.it("gives new ideas for a purer EPL testing suite")) {
-        route SampleResponse("upto now it's working");
-        $.pass();
+      on Spec($.describe("has some deep stuff")) {
+        on Spec($.it("gives new ideas for a purer EPL testing suite")) {
+          route SampleResponse("upto now it's working");
+          $.pass();
+        }
       }
     }
 
