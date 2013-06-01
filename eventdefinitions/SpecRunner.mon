@@ -64,18 +64,19 @@ event SpecRunner {
     }
   }
 
-  action _runExample(integer rootId) {
-    integer exampleId := _pendingExamplesIdByContext[rootId][0];
-    _cursor := exampleId;
-    route Spec(exampleId);
-    on _SpecDone(exampleId) {
-      _pendingExamplesIdByContext[rootId].remove(0);
-      if _pendingExamplesIdByContext[rootId].size() > 0 then {
-        _runExample(rootId);
-      } else {
-        _pendingContextsId.remove(0);
-        _runContext();
+  action _runExample(integer contextId) {
+    if _pendingExamplesIdByContext[contextId].size() > 0 then {
+      integer exampleId := _pendingExamplesIdByContext[contextId][0];
+      _cursor := exampleId;
+
+      route Spec(exampleId);
+      on _SpecDone(exampleId) {
+        _pendingExamplesIdByContext[contextId].remove(0);
+        _runExample(contextId);
       }
+    } else {
+      _pendingContextsId.remove(0);
+      _runContext();
     }
   }
 
