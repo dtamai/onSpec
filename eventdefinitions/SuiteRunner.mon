@@ -2,6 +2,7 @@
 
 monitor SuiteRunner {
   sequence<integer> specs := [];
+  sequence<string> results := [];
 
   action onload() {
     on all NewSuite() {
@@ -21,10 +22,23 @@ monitor SuiteRunner {
       disc.quit();
       runSpec();
     }
+
+    on all Failure() {
+      results.append("F");
+    }
+
+    on all Success() {
+      results.append(".");
+    }
+
+    on all Skip() {
+      results.append("S");
+    }
+
   }
 
   action runSpec() {
-    if specs.size() <= 0 then { die; }
+    if specs.size() <= 0 then { endSuite(); }
 
     integer currId := specs[0];
     route _SpecBegin(currId);
@@ -32,6 +46,11 @@ monitor SuiteRunner {
       specs.remove(0);
       runSpec();
     }
+  }
+
+  action endSuite() {
+    print "".join(results);
+    die;
   }
 }
 

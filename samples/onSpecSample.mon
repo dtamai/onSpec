@@ -48,7 +48,7 @@ monitor onSpecSample {
     on Spec($.describe("The second example")) {
       on Spec($.it("extends the understanding")) {
         route SampleResponse("it did");
-        $.pass();
+        $.fail("Eventually something breaks");
       }
     }
 
@@ -73,7 +73,7 @@ monitor onSpecSample2 {
     on Spec(_.describe("Another monitor")) {
       on Spec(_.it("verifies two monitors can run")) {
         route SampleResponse("and they are!");
-        _.pass();
+        _.skip();
       }
     }
   }
