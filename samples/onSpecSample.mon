@@ -13,13 +13,15 @@ event SampleResponse {
 
 monitor onSpecSampleHelper {
   action onload() {
-    on SampleResponse("it helped") and
-      SampleResponse("upto now it's working") and
-      SampleResponse("it did") and
-      SampleResponse(". . .") and
-      SampleResponse("and they are!") {
-        print "[GOOD] Working as expected";
-      }
+    on all NewSuite() {
+      on SampleResponse("it helped") and
+        SampleResponse("upto now it's working") and
+        SampleResponse("it did") and
+        SampleResponse(". . .") and
+        SampleResponse("and they are!") {
+          print "[GOOD] Working as expected";
+        }
+    }
   }
 }
 

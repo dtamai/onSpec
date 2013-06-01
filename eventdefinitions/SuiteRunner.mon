@@ -24,7 +24,7 @@ monitor SuiteRunner {
   }
 
   action runSpec() {
-    if specs.size() <= 0 then { return; }
+    if specs.size() <= 0 then { die; }
 
     integer currId := specs[0];
     route _SpecBegin(currId);
