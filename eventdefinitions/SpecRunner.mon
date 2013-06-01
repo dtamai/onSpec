@@ -4,21 +4,21 @@ event SpecRunner {
   integer _specId;
 
   action addContext(string text) returns integer {
-    _incrCount();
-    __contexts[_counter] := _ContextDescription(_counter, text, __currContext.parentContexts.clone());
-    _pendingContextsId.append(_counter);
+    integer id := _getId();
+    __contexts[id] := _ContextDescription(id, text, __currContext.parentContexts.clone());
+    _pendingContextsId.append(id);
     _exampleRootsTags.append(_currTags);
-    _pendingExamplesIdByContext.add(_counter, new sequence<integer>);
+    _pendingExamplesIdByContext.add(id, new sequence<integer>);
     _currTags := "";
-    return _counter;
+    return id;
   }
 
   action addSpec(string text) returns integer {
-    _incrCount();
-    __examples[_counter] := _SpecDescription(_counter, text, __currContext.parentContexts.clone());
-    _pendingExamplesIdByContext[_cursor].append(_counter);
+    integer id := _getId();
+    __examples[id] := _SpecDescription(id, text, __currContext.parentContexts.clone());
+    _pendingExamplesIdByContext[_cursor].append(id);
     _currTags := "";
-    return _counter;
+    return id;
   }
 
   action addTags(string tags) {
@@ -35,8 +35,8 @@ event SpecRunner {
     return _cursor;
   }
 
-  action _incrCount() {
-    _counter := integer.getUnique();
+  action _getId() returns integer{
+    return integer.getUnique();
   }
 
   action _doSpawn() {
@@ -92,7 +92,6 @@ event SpecRunner {
   }
 
   action<> _entryPoint;
-  integer _counter;
   string _currTags;
   integer _cursor;
   sequence<integer> _pendingContextsId;
