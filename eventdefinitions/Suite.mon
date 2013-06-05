@@ -36,16 +36,18 @@ event Suite {
 
   action skip() {
     route Skip();
+    //TODO: report which test was skipped
     done();
   }
 
   action fail(string reason) {
-    route Failure(reason);
+    route _Failure(reason, _runner.getCurrentContext());
+    //TODO: report which test failed
     done();
   }
 
   action done() {
-    route _SpecDone(_runner.getCurrentSpec());
+    route _SpecDone(_runner.getCurrentSpecId());
   }
 
   action assertTrue(boolean test) {

@@ -31,8 +31,20 @@ event SpecRunner {
     _doSpawn();
   }
 
-  action getCurrentSpec() returns integer {
+  action getCurrentSpecId() returns integer {
     return _cursor;
+  }
+
+  action getCurrentContext() returns string {
+    sequence<string> contexts := [];
+    _SpecDescription spec := __examples[_cursor];
+    integer ctxId;
+    for ctxId in __examples[_cursor].parentContexts {
+      if ctxId = 0 then { continue; }
+      contexts.append(__contexts[ctxId].text);
+    }
+    contexts.append(__examples[_cursor].text);
+    return ": ".join(contexts);
   }
 
   action _getId() returns integer{
@@ -69,6 +81,7 @@ event SpecRunner {
       integer exampleId := _pendingExamplesIdByContext[contextId][0];
       _cursor := exampleId;
 
+      //TODO: spawn and die after done or timeout
       route Spec(exampleId);
       on _SpecDone(exampleId) {
         _pendingExamplesIdByContext[contextId].remove(0);

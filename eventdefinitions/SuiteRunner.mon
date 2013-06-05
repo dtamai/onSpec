@@ -3,6 +3,7 @@
 monitor SuiteRunner {
   sequence<integer> specs := [];
   sequence<string> results := [];
+  sequence<string> failures := [];
 
   action onload() {
     on all NewSuite() {
@@ -23,8 +24,10 @@ monitor SuiteRunner {
       runSpec();
     }
 
-    on all Failure() {
+    _Failure f;
+    on all _Failure():f {
       results.append("F");
+      failures.append("'" + f.context + "' failed: " + f.reason);
     }
 
     on all Success() {
@@ -50,6 +53,7 @@ monitor SuiteRunner {
 
   action endSuite() {
     print "".join(results);
+    print "\n".join(failures);
     die;
   }
 }

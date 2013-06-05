@@ -1,5 +1,10 @@
 package com.dtamai.onspec;
 
+event _Failure {
+  wildcard string reason;
+  wildcard string context;
+}
+
 event Failure {
   wildcard string reason;
 }
