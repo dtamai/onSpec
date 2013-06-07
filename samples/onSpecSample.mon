@@ -18,7 +18,8 @@ monitor onSpecSampleHelper {
         SampleResponse("upto now it's working") and
         SampleResponse("it did") and
         SampleResponse(". . .") and
-        SampleResponse("and they are!") {
+        SampleResponse("and they are!") and
+        SampleResponse("did I forget something?") {
           print "[GOOD] Working as expected";
         }
     }
@@ -78,6 +79,10 @@ monitor onSpecSample2 {
       on Spec(_.it("verifies two monitors can run")) {
         route SampleResponse("and they are!");
         _.skip();
+      }
+
+      on Spec(_.it("has that one that times out")) {
+        route SampleResponse("did I forget something?");
       }
     }
   }

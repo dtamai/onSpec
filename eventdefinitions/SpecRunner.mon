@@ -3,6 +3,10 @@ package com.dtamai.onspec;
 event SpecRunner {
   integer _specId;
 
+  constant integer ROOT_ID := 0;
+  //TODO: configuration?
+  constant float timeout := 0.2;
+
   action addContext(string text) returns integer {
     integer id := _getId();
     __contexts[id] := _ContextDescription(id, text, __currContext.parentContexts.clone());
@@ -36,14 +40,17 @@ event SpecRunner {
   }
 
   action getCurrentContext() returns string {
+    return _stringfyContextForExample(_cursor);
+  }
+
+  action _stringfyContextForExample(integer exampleId) returns string {
     sequence<string> contexts := [];
-    _SpecDescription spec := __examples[_cursor];
     integer ctxId;
-    for ctxId in __examples[_cursor].parentContexts {
-      if ctxId = 0 then { continue; }
+    for ctxId in __examples[exampleId].parentContexts {
+      if ctxId = ROOT_ID then { continue; }
       contexts.append(__contexts[ctxId].text);
     }
-    contexts.append(__examples[_cursor].text);
+    contexts.append(__examples[exampleId].text);
     return ": ".join(contexts);
   }
 
@@ -81,8 +88,7 @@ event SpecRunner {
       integer exampleId := _pendingExamplesIdByContext[contextId][0];
       _cursor := exampleId;
 
-      //TODO: spawn and die after done or timeout
-      route Spec(exampleId);
+      spawn _reallyRun(exampleId);
       on _SpecDone(exampleId) {
         _pendingExamplesIdByContext[contextId].remove(0);
         _runExample(contextId);
@@ -93,10 +99,30 @@ event SpecRunner {
     }
   }
 
+  action _reallyRun(integer exampleId) {
+    _entryPoint();
+    _SpecDescription example := __examples[exampleId];
+
+    integer ctxId;
+    for ctxId in example.parentContexts {
+      if ctxId = ROOT_ID then { continue; }
+      route Spec(ctxId);
+    }
+
+    route Spec(exampleId);
+    on wait (timeout) {
+      route _Failure("timeout", _stringfyContextForExample(exampleId));
+      route _SpecDone(exampleId);
+    }
+    on _SpecDone(exampleId) {
+      die;
+    }
+  }
+
   action _createRootContext(integer id) returns _ContextDescription {
     _ContextDescription c := new _ContextDescription;
     c.id := id;
-    c.parentContexts := [id];
+    c.parentContexts := [ROOT_ID];
     return c;
   }
 
