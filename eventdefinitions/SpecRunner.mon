@@ -35,6 +35,9 @@ event SpecRunner {
     _doSpawn();
   }
 
+
+  // privates
+
   action _getCurrentContext() returns string {
     return _stringfyContextForExample(_cursor);
   }
@@ -128,8 +131,7 @@ event SpecRunner {
 
     route Spec(exampleId);
     on wait (timeout) {
-      route _Failure("timeout", _stringfyContextForExample(exampleId));
-      route _SpecDone(exampleId);
+      SpecReporter().fail("timeout");
     }
     on _SpecDone(exampleId) {
       die;
