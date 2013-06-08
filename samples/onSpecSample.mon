@@ -88,9 +88,3 @@ monitor onSpecSample2 {
   }
 }
 
-monitor Go {
-  action onload() {
-    route NewSuite();
-  }
-}
-
