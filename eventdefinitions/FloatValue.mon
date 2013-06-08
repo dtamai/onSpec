@@ -1,0 +1,31 @@
+package com.dtamai.onspec;
+
+event FloatValue {
+  wildcard float actual;
+
+  action testFailed(float expected, float delta, string expectation) {
+    string reason := actual.toString() + " expected to be " + expectation +
+                     " " + expected.toString() + 
+                     " (within " + delta.toString() +
+                     ")";
+    SpecReporter().fail(reason);
+  }
+
+  action _withinDelta(float expected, float delta) returns boolean {
+    float diff := (actual - expected).abs();
+
+    return diff <= delta;
+  }
+
+  action mustBe(float expected, float delta) {
+    if not _withinDelta(expected, delta) then {
+      testFailed(expected, delta, "equal");
+    }
+  }
+
+  action mustNotBe(float expected, float delta) {
+    if _withinDelta(expected, delta) then {
+      testFailed(expected, delta, "not equal");
+    }
+  }
+}

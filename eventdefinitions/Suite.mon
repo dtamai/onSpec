@@ -47,13 +47,6 @@ event Suite {
     }
   }
 
-  action assertFloat(float actual) returns _AssertionFloatRelative {
-    //TODO: report counter
-    _AssertionFloatRelative r := new _AssertionFloatRelative;
-    r.actual := actual;
-    return r;
-  }
-
   action assertString(string actual) returns _AssertionString {
     //TODO: report counter
     _AssertionString r := new _AssertionString;

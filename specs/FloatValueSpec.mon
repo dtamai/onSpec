@@ -1,0 +1,40 @@
+package com.dtamai.onspec;
+
+monitor FloatValueSpec {
+  Suite _;
+
+  action onload() {
+    _.init(run);
+  }
+
+  action run() {
+    on Spec(_.describe("FloatValue")) {
+      on Spec(_.it("verifies float values")) {
+        FloatValue(1.).mustBe(1., 0.1);
+        FloatValue(2.).mustNotBe(1., 0.1);
+        _.done();
+      }
+
+      on Spec(_.it("verifies float values within delta")) {
+        FloatValue(1.).mustBe(1.01, 0.1);
+        FloatValue(2.24).mustNotBe(2.25, 0.005);
+        _.done();
+      }
+
+      on Spec(_.it("verifies negative float values")) {
+        FloatValue(-1.).mustBe(-1., 0.1);
+        FloatValue(-2.3).mustNotBe(2.3, 0.1);
+        _.done();
+      }
+
+      on Spec(_.it("verifies values around zero")) {
+        FloatValue(0.).mustBe(0., 0.1);
+        FloatValue(0.).mustBe(-0., 0.1);
+        FloatValue(-0.).mustBe(0., 0.1);
+        FloatValue(0.001).mustBe(-0.001, 0.1);
+        _.done();
+      }
+    }
+  }
+
+}
