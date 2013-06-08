@@ -5,13 +5,3 @@ event _Failure {
   wildcard string context;
 }
 
-event Failure {
-  wildcard string reason;
-}
-
-event Success {
-}
-
-event Skip {
-}
-

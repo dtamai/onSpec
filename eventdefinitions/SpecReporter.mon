@@ -1,0 +1,36 @@
+package com.dtamai.onspec;
+
+event Failure {
+  wildcard string reason;
+}
+
+event Success {
+}
+
+event Skip {
+}
+
+event Done {
+}
+
+event SpecReporter {
+  action pass() {
+    route Success();
+    done();
+  }
+
+  action fail(string reason) {
+    route Failure(reason);
+    done();
+  }
+
+  action skip() {
+    route Skip();
+    done();
+  }
+
+  action done() {
+    route Done();
+  }
+}
+
