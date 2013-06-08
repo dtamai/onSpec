@@ -59,13 +59,22 @@ event SpecRunner {
   }
 
   action _listenProgressionEvents() {
-    on all Done() {
-      route _SpecDone(getCurrentSpecId());
+    Skip s;
+    on all Skip():s {
+      route _Skip(getCurrentContext());
+    }
+
+    on all Success() {
+      route _Success();
     }
 
     Failure f;
     on all Failure():f {
       route _Failure(f.reason, getCurrentContext());
+    }
+
+    on all Done() {
+      route _SpecDone(getCurrentSpecId());
     }
   }
 

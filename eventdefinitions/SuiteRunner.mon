@@ -4,6 +4,7 @@ monitor SuiteRunner {
   sequence<integer> specs := [];
   sequence<string> results := [];
   sequence<string> failures := [];
+  sequence<string> skips := [];
 
   action onload() {
     on all NewSuite() {
@@ -30,12 +31,14 @@ monitor SuiteRunner {
       failures.append("'" + f.context + "' failed: " + f.reason);
     }
 
-    on all Success() {
+    on all _Success() {
       results.append(".");
     }
 
-    on all Skip() {
+    _Skip s;
+    on all _Skip():s {
       results.append("S");
+      skips.append("'" + s.context + "' skipped");
     }
 
   }
@@ -54,6 +57,7 @@ monitor SuiteRunner {
   action endSuite() {
     print "".join(results);
     print "\n".join(failures);
+    print "\n".join(skips);
     die;
   }
 }
