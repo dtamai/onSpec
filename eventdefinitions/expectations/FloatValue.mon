@@ -1,4 +1,4 @@
-package com.dtamai.onspec;
+package com.dtamai.onspec.expectation;
 
 event FloatValue {
   wildcard float actual;
@@ -8,7 +8,7 @@ event FloatValue {
                      " " + expected.toString() + 
                      " (within " + delta.toString() +
                      ")";
-    SpecReporter().fail(reason);
+    com.dtamai.onspec.SpecReporter().fail(reason);
   }
 
   action _withinDelta(float expected, float delta) returns boolean {

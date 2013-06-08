@@ -1,11 +1,11 @@
-package com.dtamai.onspec;
+package com.dtamai.onspec.expectation;
 
 event StringValue {
   wildcard string actual;
 
   action testFailed(string expected, string expectation) {
     string reason := "\"" + actual + "\" expected to " + expectation + " \"" + expected + "\"";
-    SpecReporter().fail(reason);
+    com.dtamai.onspec.SpecReporter().fail(reason);
   }
 
   action mustBe(string expected) {

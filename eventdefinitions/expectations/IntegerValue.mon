@@ -1,11 +1,11 @@
-package com.dtamai.onspec;
+package com.dtamai.onspec.expectation;
 
 event IntegerValue {
   wildcard integer actual;
 
   action testFailed(integer expected, string expectation) {
     string reason := actual.toString() + " expected to be " + expectation + " " + expected.toString();
-    SpecReporter().fail(reason);
+    com.dtamai.onspec.SpecReporter().fail(reason);
   }
 
   action mustBe(integer expected) {

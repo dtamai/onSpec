@@ -1,5 +1,7 @@
 package com.dtamai.onspec;
 
+using com.dtamai.onspec.expectation.BooleanValue;
+
 monitor BooleanValueSpec {
   Suite _;
 

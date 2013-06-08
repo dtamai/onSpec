@@ -1,5 +1,7 @@
 package com.dtamai.onspec;
 
+using com.dtamai.onspec.expectation.IntegerValue;
+
 monitor IntegerValueSpec {
   Suite _;
 
