@@ -1,0 +1,22 @@
+package com.dtamai.onspec;
+
+monitor BooleanValueSpec {
+  Suite _;
+
+  action onload() {
+    _.init(run);
+  }
+
+  action run() {
+    on Spec(_.describe("BooleanValue")) {
+      on Spec(_.it("verifies values are true")) {
+        boolean actual := true;
+        boolean expected := true;
+
+        BooleanValue(actual).mustBe(expected);
+        BooleanValue(actual).mustNotBe(not expected);
+        _.done();
+      }
+    }
+  }
+}

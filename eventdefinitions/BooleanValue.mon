@@ -1,6 +1,6 @@
 package com.dtamai.onspec;
 
-event _AssertionBoolean {
+event BooleanValue {
   wildcard boolean actual;
 
   action testFailed(boolean expected, string expectation) {
@@ -13,16 +13,16 @@ event _AssertionBoolean {
 
     string reason := actual.toString() + " expected to be " + 
                      expectation + sep + expected.toString();
-    route Failure(reason);
+    SpecReporter().fail(reason);
   }
 
-  action eq(boolean expected) {
+  action mustBe(boolean expected) {
     if not (expected = actual) then {
       testFailed(expected, "");
     }
   }
 
-  action neq(boolean expected) {
+  action mustNotBe(boolean expected) {
     if not (expected != actual) then {
       testFailed(expected, "not");
     }

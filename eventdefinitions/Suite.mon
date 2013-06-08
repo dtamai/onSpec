@@ -24,13 +24,6 @@ event Suite {
     }
   }
 
-  action _handleNewSuite(action<> runnable) {
-    route _SpecPresent(self._id);
-    on _SpecBegin(_id) {
-      _runner.run(runnable, self._id);
-    }
-  }
-
   action pass() {
     _reporter.pass();
   }
@@ -47,18 +40,11 @@ event Suite {
     _reporter.done();
   }
 
-  action assertTrue(boolean test) {
-    //TODO: report counter
-    _AssertionBoolean r := new _AssertionBoolean;
-    r.actual := test;
-    r.eq(true);
-  }
-
-  action assertBoolean(boolean actual) returns _AssertionBoolean {
-    //TODO: report counter
-    _AssertionBoolean r := new _AssertionBoolean;
-    r.actual := actual;
-    return r;
+  action _handleNewSuite(action<> runnable) {
+    route _SpecPresent(self._id);
+    on _SpecBegin(_id) {
+      _runner.run(runnable, self._id);
+    }
   }
 
   action assertInteger(integer actual) returns _AssertionInteger {
