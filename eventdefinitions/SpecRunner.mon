@@ -35,11 +35,11 @@ event SpecRunner {
     _doSpawn();
   }
 
-  action getCurrentSpecId() returns integer {
+  action _getCurrentSpecId() returns integer {
     return _cursor;
   }
 
-  action getCurrentContext() returns string {
+  action _getCurrentContext() returns string {
     return _stringfyContextForExample(_cursor);
   }
 
@@ -61,7 +61,7 @@ event SpecRunner {
   action _listenProgressionEvents() {
     Skip s;
     on all Skip():s {
-      route _Skip(getCurrentContext());
+      route _Skip(_getCurrentContext());
     }
 
     on all Success() {
@@ -70,11 +70,11 @@ event SpecRunner {
 
     Failure f;
     on all Failure():f {
-      route _Failure(f.reason, getCurrentContext());
+      route _Failure(f.reason, _getCurrentContext());
     }
 
     on all Done() {
-      route _SpecDone(getCurrentSpecId());
+      route _SpecDone(_getCurrentSpecId());
     }
   }
 
