@@ -47,13 +47,6 @@ event Suite {
     }
   }
 
-  action assertInteger(integer actual) returns _AssertionInteger {
-    //TODO: report counter
-    _AssertionInteger r := new _AssertionInteger;
-    r.actual := actual;
-    return r;
-  }
-
   action assertFloat(float actual) returns _AssertionFloatRelative {
     //TODO: report counter
     _AssertionFloatRelative r := new _AssertionFloatRelative;

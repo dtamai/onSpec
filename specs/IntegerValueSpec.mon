@@ -1,0 +1,35 @@
+package com.dtamai.onspec;
+
+monitor IntegerValueSpec {
+  Suite _;
+
+  action onload() {
+    _.init(run);
+  }
+
+  action run() {
+    on Spec(_.describe("IntegerValue")) {
+      on Spec(_.it("verifies integer values")) {
+        integer actual := 12;
+        integer expected := 12;
+
+        IntegerValue(actual).mustBe(expected);
+        IntegerValue(actual).mustNotBe(expected + 1);
+        IntegerValue(actual).mustBeGreaterThan(expected - 1);
+        IntegerValue(actual).mustBeLessThan(expected + 1);
+        IntegerValue(actual).mustBeGreaterThanOrEqual(expected);
+        IntegerValue(actual).mustBeLessThanOrEqual(expected);
+        _.done();
+      }
+
+      on Spec(_.it("works with negative integers")) {
+        IntegerValue(-1).mustBe(-1);
+        IntegerValue(-2).mustBeGreaterThan(-3);
+        IntegerValue(-3).mustBeLessThan(-2);
+        IntegerValue(-4).mustBeGreaterThanOrEqual(-5);
+        IntegerValue(-5).mustBeLessThanOrEqual(-4);
+        _.done();
+      }
+    }
+  }
+}
