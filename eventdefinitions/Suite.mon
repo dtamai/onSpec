@@ -37,7 +37,7 @@ event Suite {
   }
 
   action done() {
-    _reporter.done();
+    _reporter.pass();
   }
 
   action _handleNewSuite(action<> runnable) {
