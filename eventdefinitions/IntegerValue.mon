@@ -19,28 +19,4 @@ event IntegerValue {
       testFailed(expected, "not equal");
     }
   }
-
-  action mustBeGreaterThan(integer boundary) {
-    if not (boundary < actual) then {
-      testFailed(boundary, "greater than");
-    }
-  }
-
-  action mustBeLessThan(integer boundary) {
-    if not (boundary > actual) then {
-      testFailed(boundary, "less than");
-    }
-  }
-
-  action mustBeGreaterThanOrEqual(integer boundary) {
-    if not (boundary <= actual) then {
-      testFailed(boundary, "greater than or equal");
-    }
-  }
-
-  action mustBeLessThanOrEqual(integer boundary) {
-    if not (boundary >= actual) then {
-      testFailed(boundary, "less than or equal");
-    }
-  }
 }
