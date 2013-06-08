@@ -1,0 +1,19 @@
+package com.dtamai.onspec;
+
+monitor StringValueSpec {
+  Suite _;
+
+  action onload() {
+    _.init(run);
+  }
+
+  action run() {
+    on Spec(_.describe("StringValue")) {
+      on Spec(_.it("verifies strings are equal")) {
+        StringValue("test").mustBe("test");
+        StringValue("test").mustNotBe("not test");
+        _.done();
+      }
+    }
+  }
+}

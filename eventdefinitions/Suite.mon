@@ -46,11 +46,4 @@ event Suite {
       _runner.run(runnable, self._id);
     }
   }
-
-  action assertString(string actual) returns _AssertionString {
-    //TODO: report counter
-    _AssertionString r := new _AssertionString;
-    r.actual := actual;
-    return r;
-  }
 }
