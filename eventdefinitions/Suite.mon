@@ -3,6 +3,8 @@ package com.dtamai.onspec;
 event Suite {
   wildcard integer _id;
   SpecRunner _runner;
+  SpecReporter _reporter;
+
   action describe(string text) returns integer {
     return _runner.addContext(text);
   }
@@ -30,24 +32,19 @@ event Suite {
   }
 
   action pass() {
-    route Success();
-    done();
+    _reporter.pass();
   }
 
   action skip() {
-    route Skip();
-    //TODO: report which test was skipped
-    done();
+    _reporter.skip();
   }
 
   action fail(string reason) {
-    route _Failure(reason, _runner.getCurrentContext());
-    //TODO: report which test failed
-    done();
+    _reporter.fail(reason);
   }
 
   action done() {
-    route _SpecDone(_runner.getCurrentSpecId());
+    _reporter.done();
   }
 
   action assertTrue(boolean test) {

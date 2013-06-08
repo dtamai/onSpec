@@ -58,12 +58,24 @@ event SpecRunner {
     return integer.getUnique();
   }
 
+  action _listenProgressionEvents() {
+    on all Done() {
+      route _SpecDone(getCurrentSpecId());
+    }
+
+    Failure f;
+    on all Failure():f {
+      route _Failure(f.reason, getCurrentContext());
+    }
+  }
+
   action _doSpawn() {
     spawn _runEntry;
   }
 
   action _runEntry() {
     __currContext := _createRootContext(self._specId);
+    _listenProgressionEvents();
     _entryPoint();
     _runContext();
   }
