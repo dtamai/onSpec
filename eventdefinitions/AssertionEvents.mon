@@ -5,3 +5,9 @@ event _Failure {
   wildcard string context;
 }
 
+event _Success {
+}
+
+event _Skip {
+  wildcard string context;
+}
