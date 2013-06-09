@@ -2,4 +2,5 @@
 .dependencies
 logs/
 .settings/
+build/
 
