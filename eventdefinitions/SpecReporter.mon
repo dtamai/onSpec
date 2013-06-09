@@ -17,22 +17,49 @@ event Skip {
 event Done {
 }
 
+/**
+* Event object that reports the result of examples.
+* onSpec verifications can be extended using this event, it is important to
+* note that each action terminates the current example, so there can be
+* multiple verifications using conditional failures and a final success
+* that will be sent only if no failure had been sent.
+*/
 event SpecReporter {
+
+  /**
+   * Notifies that the example was successful.
+   * It should be used inside a listener block of an asynchronous spec.
+   * It terminates the current example.
+   */
   action pass() {
     route Success();
     done();
   }
 
+  /**
+   * Notifies that the example was not successful.
+   * It should be used inside a listener block of an asynchronous spec.
+   * It terminates the current example.
+   */
   action fail(string reason) {
     route Failure(reason);
     done();
   }
 
+  /**
+   * Notifies that the example should be skipped.
+   * Skipped examples are verbosely reported at the end of the specs.
+   * It terminates the current example.
+   */
   action skip() {
     route Skip();
     done();
   }
 
+  /**
+   * Notifies that the example has finished.
+   * It should be used to terminate a synchronous spec.
+   */
   action done() {
     route Done();
   }
