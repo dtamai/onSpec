@@ -1,11 +1,11 @@
 ﻿package com.dtamai.onspec;
 
-// Injecting this file should print '[GOOD] Working as expected' in the console
-//
-// It's just a tracing bullet for a real spec monitor, to verify if the syntax is 
-// clean enough. It completely skips the 'assertion' part of the spec, instead it 
-// routes an event so that the helper monitor can assert that the specs were 
-// called.
+/*
+* Injecting this file should print '[GOOD] Working as expected' in the console
+*
+* While I still try to find a way to test onSpec using onSpec, this sample
+* is a good enough integration test.
+*/
 
 event SampleResponse {
   string text;
