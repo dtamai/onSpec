@@ -3,6 +3,7 @@ package com.dtamai.onspec.expectation;
 event FloatValue {
   wildcard float actual;
 
+  /** @private */
   action testFailed(float expected, float delta, string expectation) {
     string reason := actual.toString() + " expected to be " + expectation +
                      " " + expected.toString() + 
@@ -11,6 +12,7 @@ event FloatValue {
     com.dtamai.onspec.SpecReporter().fail(reason);
   }
 
+  /** @private */
   action _withinDelta(float expected, float delta) returns boolean {
     float diff := (actual - expected).abs();
 

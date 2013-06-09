@@ -1,10 +1,15 @@
 package com.dtamai.onspec;
 
 event SpecRunner {
+
+  /** @private */
   integer _specId;
 
+  /** @private */
   constant integer ROOT_ID := 0;
+
   //TODO: configuration?
+  /** @private */
   constant float timeout := 0.2;
 
   action addContext(string text) returns integer {
@@ -38,10 +43,12 @@ event SpecRunner {
 
   // privates
 
+  /** @private */
   action _getCurrentContext() returns string {
     return _stringfyContextForExample(_cursor);
   }
 
+  /** @private */
   action _stringfyContextForExample(integer exampleId) returns string {
     sequence<string> contexts := [];
     integer ctxId;
@@ -53,10 +60,12 @@ event SpecRunner {
     return ": ".join(contexts);
   }
 
+  /** @private */
   action _getId() returns integer{
     return integer.getUnique();
   }
 
+  /** @private */
   action _listenProgressionEvents() {
     Skip s;
     on all Skip():s {
@@ -77,10 +86,12 @@ event SpecRunner {
     }
   }
 
+  /** @private */
   action _doSpawn() {
     spawn _runEntry;
   }
 
+  /** @private */
   action _runEntry() {
     __currContext := _createRootContext(self._specId);
     _listenProgressionEvents();
@@ -88,6 +99,7 @@ event SpecRunner {
     _runContext();
   }
 
+  /** @private */
   action _runContext() {
     if _pendingContextsId.size() > 0 then {
       _cursor := _pendingContextsId[0];
@@ -103,6 +115,7 @@ event SpecRunner {
     }
   }
 
+  /** @private */
   action _runExample(integer contextId) {
     if _pendingExamplesIdByContext[contextId].size() > 0 then {
       integer exampleId := _pendingExamplesIdByContext[contextId][0];
@@ -119,6 +132,7 @@ event SpecRunner {
     }
   }
 
+  /** @private */
   action _reallyRun(integer exampleId) {
     _entryPoint();
     _SpecDescription example := __examples[exampleId];
@@ -138,6 +152,7 @@ event SpecRunner {
     }
   }
 
+  /** @private */
   action _createRootContext(integer id) returns _ContextDescription {
     _ContextDescription c := new _ContextDescription;
     c.id := id;
@@ -145,19 +160,30 @@ event SpecRunner {
     return c;
   }
 
+  /** @private */
   action _updateCurrentContext(integer id) {
     __currContext := __contexts[id];
     __currContext.parentContexts.append(id);
   }
 
+  /** @private */
   action<> _entryPoint;
+  /** @private */
   string _currTags;
+  /** @private */
   integer _cursor;
+  /** @private */
   sequence<integer> _pendingContextsId;
+  /** @private */
   sequence<string> _exampleRootsTags;
+  /** @private */
   dictionary<integer, sequence<integer> > _pendingExamplesIdByContext;
+  /** @private */
   dictionary<integer, _ContextDescription> __contexts;
+  /** @private */
   dictionary<integer, _SpecDescription> __examples;
+  /** @private */
   _ContextDescription __currContext;
+  /** @private */
   chunk __deadWeight;
 }

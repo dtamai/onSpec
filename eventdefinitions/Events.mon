@@ -4,17 +4,21 @@ event Spec {
   integer id;
 }
 
+/** @private */
 event _SpecBegin {
   integer id;
 }
 
+/** @private */
 event _SpecEnd {
   integer id;
 }
 
+/** @private */
 event _SpecDiscover {
 }
 
+/** @private */
 event _SpecPresent {
   wildcard integer id;
 }
@@ -22,16 +26,19 @@ event _SpecPresent {
 event NewSuite {
 }
 
+/** @private */
 event _SpecDone {
   integer id;
 }
 
+/** @private */
 event _ContextDescription {
   wildcard integer id;
   wildcard string text;
   wildcard sequence<integer> parentContexts;
 }
 
+/** @private */
 event _SpecDescription {
   wildcard integer id;
   wildcard string text;

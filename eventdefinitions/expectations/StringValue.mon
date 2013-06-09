@@ -3,6 +3,7 @@ package com.dtamai.onspec.expectation;
 event StringValue {
   wildcard string actual;
 
+  /** @private */
   action testFailed(string expected, string expectation) {
     string reason := "\"" + actual + "\" expected to " + expectation + " \"" + expected + "\"";
     com.dtamai.onspec.SpecReporter().fail(reason);

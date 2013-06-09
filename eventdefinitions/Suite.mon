@@ -1,8 +1,14 @@
 package com.dtamai.onspec;
 
 event Suite {
+
+  /** @private */
   wildcard integer _id;
+
+  /** @private */
   SpecRunner _runner;
+
+  /** @private */
   SpecReporter _reporter;
 
   action describe(string text) returns integer {
@@ -40,6 +46,7 @@ event Suite {
     _reporter.pass();
   }
 
+  /** @private */
   action _handleNewSuite(action<> runnable) {
     route _SpecPresent(self._id);
     on _SpecBegin(_id) {

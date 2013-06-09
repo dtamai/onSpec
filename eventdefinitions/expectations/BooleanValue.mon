@@ -3,6 +3,7 @@ package com.dtamai.onspec.expectation;
 event BooleanValue {
   wildcard boolean actual;
 
+  /** @private */
   action testFailed(boolean expected, string expectation) {
     string sep;
     if expectation.length() = 0 then {

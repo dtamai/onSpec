@@ -3,6 +3,7 @@ package com.dtamai.onspec.expectation;
 event IntegerValue {
   wildcard integer actual;
 
+  /** @private */
   action testFailed(integer expected, string expectation) {
     string reason := actual.toString() + " expected to be " + expectation + " " + expected.toString();
     com.dtamai.onspec.SpecReporter().fail(reason);
