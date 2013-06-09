@@ -1,9 +1,9 @@
 package com.dtamai.onspec;
 
 /**
-* Facade event to make easy write specs.
-* @listens NewSuite Runs a new spec suite
-*/
+ * Facade event to make easy write specs.
+ * @listens NewSuite Runs a new spec suite
+ */
 event Suite {
 
   /** @private */
@@ -16,21 +16,21 @@ event Suite {
   SpecReporter _reporter;
 
   /**
-  * Create a context to group examples.
-  * It should be used to define the id param for a Spec event.
-  * @param text Description of the context
-  * @return The id that identifies this context
-  */
+   * Create a context to group examples.
+   * It should be used to define the id param for a Spec event.
+   * @param text Description of the context
+   * @return The id that identifies this context
+   */
   action describe(string text) returns integer {
     return _runner.addContext(text);
   }
 
   /**
-  * Create an example. It is the runnable spec.
-  * It should be used to define the id param for a Spec event.
-  * @param text Description of the example
-  * @return The id that identifies this example
-  */
+   * Create an example. It is the runnable spec.
+   * It should be used to define the id param for a Spec event.
+   * @param text Description of the example
+   * @return The id that identifies this example
+   */
   action it(string text) returns integer {
     return _runner.addSpec(text);
   }
@@ -41,11 +41,11 @@ event Suite {
   }
 
   /**
-  * Action to initialize the suite. It needs to be called before a NewSuite.
-  * @param runnable The action that contains the contexts and example (Spec listeners)
-  * @listens NewSuite Runs a new spec suite
-  * @see Spec Runs a context or an example
-  */
+   * Action to initialize the suite. It needs to be called before a NewSuite.
+   * @param runnable The action that contains the contexts and example (Spec listeners)
+   * @listens NewSuite Runs a new spec suite
+   * @see Spec Runs a context or an example
+   */
   action init(action<> runnable) {
     self._id := integer.getUnique();
     on all NewSuite() -> _SpecDiscover() {
@@ -54,36 +54,36 @@ event Suite {
   }
 
   /**
-  * Notifies that the example was successful.
-  * It should be used inside a listener block of an asynchronous spec.
-  * It terminates the current example.
-  */
+   * Notifies that the example was successful.
+   * It should be used inside a listener block of an asynchronous spec.
+   * It terminates the current example.
+   */
   action pass() {
     _reporter.pass();
   }
 
   /**
-  * Notifies that the example should be skipped.
-  * Skipped examples are verbosely reported at the end of the specs.
-  * It terminates the current example.
-  */
+   * Notifies that the example should be skipped.
+   * Skipped examples are verbosely reported at the end of the specs.
+   * It terminates the current example.
+   */
   action skip() {
     _reporter.skip();
   }
 
   /**
-  * Notifies that the example was not successful.
-  * It should be used inside a listener block of an asynchronous spec.
-  * It terminates the current example.
-  */
+   * Notifies that the example was not successful.
+   * It should be used inside a listener block of an asynchronous spec.
+   * It terminates the current example.
+   */
   action fail(string reason) {
     _reporter.fail(reason);
   }
 
   /**
-  * Notifies that the example has finished.
-  * It should be used to terminate a synchronous spec.
-  */
+   * Notifies that the example has finished.
+   * It should be used to terminate a synchronous spec.
+   */
   action done() {
     _reporter.pass();
   }
