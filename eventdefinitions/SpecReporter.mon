@@ -1,15 +1,19 @@
 package com.dtamai.onspec;
 
+/** @private */
 event Failure {
   wildcard string reason;
 }
 
+/** @private */
 event Success {
 }
 
+/** @private */
 event Skip {
 }
 
+/** @private */
 event Done {
 }
 
