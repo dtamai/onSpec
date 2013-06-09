@@ -1,17 +1,27 @@
 ﻿package com.dtamai.onspec;
 
+/**
+ * Monitor that manages running specs.
+ * @listens NewSuite Runs a new spec suite
+ */
 monitor SuiteRunner {
+  /** @private */
   sequence<integer> specs := [];
+  /** @private */
   sequence<string> results := [];
+  /** @private */
   sequence<string> failures := [];
+  /** @private */
   sequence<string> skips := [];
 
+  /** @private */
   action onload() {
     on all NewSuite() {
       spawn handleNewSuite;
     }
   }
 
+  /** @private */
   action handleNewSuite() {
     route _SpecDiscover();
 
@@ -43,6 +53,7 @@ monitor SuiteRunner {
 
   }
 
+  /** @private */
   action runSpec() {
     if specs.size() <= 0 then { endSuite(); }
 
@@ -54,6 +65,7 @@ monitor SuiteRunner {
     }
   }
 
+  /** @private */
   action endSuite() {
     print "".join(results);
     print "\n".join(failures);
