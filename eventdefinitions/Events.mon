@@ -57,3 +57,19 @@ event _SpecDescription {
   wildcard string text;
   wildcard sequence<integer> parentContexts;
 }
+
+/** @private */
+event _Failure {
+  wildcard string reason;
+  wildcard string context;
+}
+
+/** @private */
+event _Success {
+}
+
+/** @private */
+event _Skip {
+  wildcard string context;
+}
+
