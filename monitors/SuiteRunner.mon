@@ -14,9 +14,14 @@ monitor SuiteRunner {
   /** @private */
   sequence<string> skips := [];
 
+  import "TimeFormatPlugin" as time;
+  /** @private */
+  float beginTime;
+
   /** @private */
   action onload() {
     on all NewSuite() {
+      beginTime := time.getMicroTime();
       spawn handleNewSuite;
     }
   }
@@ -67,9 +72,23 @@ monitor SuiteRunner {
 
   /** @private */
   action endSuite() {
+    print "";
     print "".join(results);
-    print "\n".join(failures);
-    print "\n".join(skips);
+    print results.size().toString() + " example(s) in " +
+      (time.getMicroTime() - beginTime).formatFixed(6) + "s | " +
+      failures.size().toString() + " failure(s) | " +
+      skips.size().toString() + " skip(s)";
+    print "";
+    if skips.size() > 0 then {
+      print "Skips: ";
+      print "\n".join(skips);
+      print "";
+    }
+    if failures.size() > 0 then {
+      print "Failures: ";
+      print "\n".join(failures);
+      print "";
+    }
     die;
   }
 }
