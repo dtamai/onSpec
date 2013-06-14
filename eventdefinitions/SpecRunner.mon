@@ -12,7 +12,7 @@ event SpecRunner {
 
   action addContext(string text) returns integer {
     integer id := _getId();
-    __contexts[id] := _ContextDescription(id, text, __currContext.parentContexts.clone());
+    __contexts[id] := _ContextDescription(id, text, __currContext.parentContextsId.clone());
     _pendingContextsId.append(id);
     _exampleRootsTags.append(_currTags);
     _pendingExamplesIdByContext.add(id, new sequence<integer>);
@@ -22,7 +22,7 @@ event SpecRunner {
 
   action addSpec(string text) returns integer {
     integer id := _getId();
-    __examples[id] := _SpecDescription(id, text, __currContext.parentContexts.clone());
+    __examples[id] := _SpecDescription(id, text, __currContext.parentContextsId.clone());
     _pendingExamplesIdByContext[_cursor].append(id);
     _currTags := "";
     return id;
@@ -48,7 +48,7 @@ event SpecRunner {
   action _stringfyContextForExample(integer exampleId) returns string {
     sequence<string> contexts := [];
     integer ctxId;
-    for ctxId in __examples[exampleId].parentContexts {
+    for ctxId in __examples[exampleId].parentContextsId {
       if ctxId = ROOT_ID then { continue; }
       contexts.append(__contexts[ctxId].text);
     }
@@ -127,7 +127,7 @@ event SpecRunner {
     _SpecDescription example := __examples[exampleId];
 
     integer ctxId;
-    for ctxId in example.parentContexts {
+    for ctxId in example.parentContextsId {
       if ctxId = ROOT_ID then { continue; }
       route Spec(ctxId);
     }
@@ -144,13 +144,13 @@ event SpecRunner {
   action _createRootContext(integer id) returns _ContextDescription {
     _ContextDescription c := new _ContextDescription;
     c.id := id;
-    c.parentContexts := [ROOT_ID];
+    c.parentContextsId := [ROOT_ID];
     return c;
   }
 
   action _updateCurrentContext(integer id) {
     __currContext := __contexts[id];
-    __currContext.parentContexts.append(id);
+    __currContext.parentContextsId.append(id);
   }
 
   action<> _entryPoint;

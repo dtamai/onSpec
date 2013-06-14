@@ -48,14 +48,14 @@ event _SpecDone {
 event _ContextDescription {
   wildcard integer id;
   wildcard string text;
-  wildcard sequence<integer> parentContexts;
+  wildcard sequence<integer> parentContextsId;
 }
 
 /** @private */
 event _SpecDescription {
   wildcard integer id;
   wildcard string text;
-  wildcard sequence<integer> parentContexts;
+  wildcard sequence<integer> parentContextsId;
 }
 
 /** @private */
