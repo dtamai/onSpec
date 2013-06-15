@@ -5,9 +5,6 @@ event SpecRunner {
 
   integer _specId;
 
-  constant integer ROOT_ID := 0;
-  constant integer NOOP_SPEC_ID := -1;
-
   //TODO: configuration?
   constant float timeout := 0.2;
 
@@ -80,7 +77,6 @@ event SpecRunner {
     sequence<string> contexts := [];
     integer ctxId;
     for ctxId in __examples[exampleId].parentContextsId {
-      if ctxId = ROOT_ID then { continue; }
       contexts.append(__contexts[ctxId].text);
     }
     contexts.append(__examples[exampleId].text);
@@ -198,7 +194,6 @@ event SpecRunner {
 
     integer ctxId;
     for ctxId in example.parentContextsId {
-      if ctxId = ROOT_ID then { continue; }
       route Spec(ctxId);
     }
 
