@@ -10,7 +10,8 @@ event SpecRunner {
   //TODO: configuration?
   constant float timeout := 0.2;
 
-  action addContext(string text) returns integer {
+  action<string> returns integer addContext;
+  action discoverContext(string text) returns integer {
     integer id := _getId();
     __contexts[id] := _ContextDescription(id, text, __currContext.parentContextsId.clone());
     _pendingContextsId.append(id);
@@ -20,7 +21,8 @@ event SpecRunner {
     return id;
   }
 
-  action addSpec(string text) returns integer {
+  action<string> returns integer addSpec;
+  action discoverExample(string text) returns integer {
     integer id := _getId();
     __examples[id] := _SpecDescription(id, text, __currContext.parentContextsId.clone());
     _pendingExamplesIdByContext[_cursor].append(id);
@@ -81,7 +83,13 @@ event SpecRunner {
   }
 
   action _doSpawn() {
+    prepareDiscovery();
     spawn _runEntry;
+  }
+
+  action prepareDiscovery() {
+    addContext := discoverContext;
+    addSpec := discoverExample;
   }
 
   action _runEntry() {
