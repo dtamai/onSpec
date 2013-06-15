@@ -41,11 +41,11 @@ event SpecRunner {
 
   // privates
 
-  action _getCurrentContext() returns string {
-    return _stringfyContextForExample(_cursor);
+  action _getCurrentContext() returns sequence<string> {
+    return _buildContextForExample(_cursor);
   }
 
-  action _stringfyContextForExample(integer exampleId) returns string {
+  action _buildContextForExample(integer exampleId) returns sequence<string> {
     sequence<string> contexts := [];
     integer ctxId;
     for ctxId in __examples[exampleId].parentContextsId {
@@ -53,7 +53,7 @@ event SpecRunner {
       contexts.append(__contexts[ctxId].text);
     }
     contexts.append(__examples[exampleId].text);
-    return ": ".join(contexts);
+    return contexts;
   }
 
   action _getId() returns integer{

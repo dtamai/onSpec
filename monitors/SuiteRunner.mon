@@ -43,7 +43,7 @@ monitor SuiteRunner {
     _Failure f;
     on all _Failure():f {
       results.append("F");
-      failures.append("'" + f.context + "' failed: " + f.reason);
+      failures.append("'" + expandContextString(f.context) + "' failed: " + f.reason);
     }
 
     on all _Success() {
@@ -53,7 +53,7 @@ monitor SuiteRunner {
     _Skip s;
     on all _Skip():s {
       results.append("S");
-      skips.append("'" + s.context + "' skipped");
+      skips.append("'" + expandContextString(s.context) + "' skipped");
     }
 
   }
@@ -68,6 +68,11 @@ monitor SuiteRunner {
       specs.remove(0);
       runSpec();
     }
+  }
+
+  /** @private */
+  action expandContextString(sequence<string> context) returns string {
+    return " ".join(context);
   }
 
   /** @private */
