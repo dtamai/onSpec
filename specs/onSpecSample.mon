@@ -11,6 +11,9 @@ event SampleResponse {
   string text;
 }
 
+event BadBadEvent {
+}
+
 monitor onSpecSampleHelper {
   action onload() {
     on all NewSuite() {
@@ -36,12 +39,16 @@ monitor onSpecSample {
   action run() {
     on Spec($.describe("First example")) {
       on Spec($.it("helps understand the order of evaluation")) {
+        on all BadBadEvent() {
+          print "[BAD] Triggered a listener that should not exist";
+        }
         route SampleResponse("it helped");
         $.pass();
       }
 
       on Spec($.describe("has some deep stuff")) {
         on Spec($.it("gives new ideas for a purer EPL testing suite")) {
+          route BadBadEvent();
           route SampleResponse("upto now it's working");
           $.pass();
         }
@@ -78,7 +85,7 @@ monitor onSpecSample2 {
     on Spec(_.describe("Another monitor")) {
       on Spec(_.it("verifies two monitors can run")) {
         route SampleResponse("and they are!");
-        _.skip();
+        _.pass();
       }
 
       on Spec(_.it("has that one that times out")) {

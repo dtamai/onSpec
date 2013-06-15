@@ -8,11 +8,15 @@ event SpecRunner {
   //TODO: configuration?
   constant float timeout := 0.2;
 
+  dictionary<string /*text*/, integer /*id*/> contextsMap;
+  sequence<integer /*id*/> contextsOrder;
   action<string> returns integer addContext;
   action discoverContext(string text) returns integer {
     integer id := _getId();
     __contexts[id] := _ContextDescription(id, text, __currContext.idSequenceToOpen.clone());
-    enqueuePendingContextId(id);
+    contextsMap[text] := id;
+    contextsOrder.append(id);
+    _pendingContextsId.append(id);
 
     _exampleRootsTags.append(_currTags);
     _currTags := "";
@@ -20,11 +24,14 @@ event SpecRunner {
     return id;
   }
 
+  dictionary<string /*text*/, integer /*id*/> examplesMap;
+  sequence<integer /*id*/> examplesOrder;
   action<string> returns integer addSpec;
   action discoverExample(string text) returns integer {
     integer id := _getId();
+    examplesMap[text] := id;
+    examplesOrder.append(id);
     __examples[id] := _SpecDescription(id, text, __currContext.idSequenceToOpen.clone());
-    enqueuePendingExampleId(id);
 
     _currTags := "";
 
@@ -32,17 +39,11 @@ event SpecRunner {
   }
 
   action repeatContextsId(string text) returns integer {
-    integer id := __contexts.keys()[_repeatingContextIndex];
-    enqueuePendingContextId(id);
-    _repeatingContextIndex := _repeatingContextIndex + 1;
-    return id;
+    return contextsMap[text];
   }
 
   action repeatExamplesId(string text) returns integer {
-    integer id := __examples.keys()[_repeatingExampleIndex];
-    enqueuePendingExampleId(id);
-    _repeatingExampleIndex := _repeatingExampleIndex + 1;
-    return id;
+    return examplesMap[text];
   }
 
   action addTags(string tags) {
@@ -97,10 +98,8 @@ event SpecRunner {
   }
 
   action rewindSpecMonitor() {
-    _repeatingContextIndex := 0;
-    _repeatingExampleIndex := 0;
     _entryPoint();
-    _cursor := _pendingContextsId[0];
+    _cursor := contextsOrder[0];
   }
 
   action _doSpawn() {
@@ -109,37 +108,28 @@ event SpecRunner {
 
   action _runEntry() {
     _listenProgressionEvents();
-    rewindSpecMonitor();
-    _runContext();
+    runExamples();
   }
 
-  action _runContext() {
-    if _pendingContextsId.size() > 0 then {
-      _cursor := _pendingContextsId[0];
+  sequence<integer> pendingExamplesId;
+  action runExamples() {
+    pendingExamplesId := examplesOrder.clone();
+    runFirstExample();
+  }
 
-      route Spec(_cursor);
-      on completed Spec(_cursor) {
-        _runExample(_cursor);
+  action runFirstExample() {
+    if pendingExamplesId.size() > 0 then {
+      integer exId := pendingExamplesId[0];
+      _cursor := exId;
+
+      spawn _reallyRun(exId);
+      on _SpecDone(exId) {
+        pendingExamplesId.remove(0);
+        runFirstExample();
       }
     } else {
       route _SpecEnd(self._specId);
       die;
-    }
-  }
-
-  action _runExample(integer contextId) {
-    if _pendingExamplesIdByContext[contextId].size() > 0 then {
-      integer exampleId := _pendingExamplesIdByContext[contextId][0];
-      _cursor := exampleId;
-
-      spawn _reallyRun(exampleId);
-      on _SpecDone(exampleId) {
-        _pendingExamplesIdByContext[contextId].remove(0);
-        _runExample(contextId);
-      }
-    } else {
-      _pendingContextsId.remove(0);
-      _runContext();
     }
   }
 
@@ -148,7 +138,7 @@ event SpecRunner {
     _SpecDescription example := __examples[exampleId];
 
     integer ctxId;
-    for ctxId in example.parentContextsId {
+    for ctxId in __examples[exampleId].parentContextsId {
       route Spec(ctxId);
     }
 
@@ -159,15 +149,6 @@ event SpecRunner {
     on _SpecDone(exampleId) {
       die;
     }
-  }
-
-  action enqueuePendingContextId(integer contextId) {
-    _pendingContextsId.append(contextId);
-    _pendingExamplesIdByContext.add(contextId, new sequence<integer>);
-  }
-
-  action enqueuePendingExampleId(integer exampleId) {
-    _pendingExamplesIdByContext[_cursor].append(exampleId);
   }
 
   action _getCurrentContext() returns sequence<string> {
@@ -221,7 +202,6 @@ event SpecRunner {
   integer _cursor;
   sequence<integer> _pendingContextsId;
   sequence<string> _exampleRootsTags;
-  dictionary<integer, sequence<integer> > _pendingExamplesIdByContext;
 
   // Holds all contexts, its is populated in the first run and should be
   // read-only after discovery is done
@@ -230,9 +210,6 @@ event SpecRunner {
   // Holds all examples, it is populated in the first run and should be
   // read-only after discovery is done
   dictionary<integer, _SpecDescription> __examples;
-
-  integer _repeatingContextIndex;
-  integer _repeatingExampleIndex;
 
   _ContextDescription __currContext;
   chunk __deadWeight;
