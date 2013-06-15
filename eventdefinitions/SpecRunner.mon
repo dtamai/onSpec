@@ -6,6 +6,7 @@ event SpecRunner {
   integer _specId;
 
   constant integer ROOT_ID := 0;
+  constant integer NOOP_SPEC_ID := -1;
 
   //TODO: configuration?
   constant float timeout := 0.2;
@@ -27,6 +28,20 @@ event SpecRunner {
     __examples[id] := _SpecDescription(id, text, __currContext.parentContextsId.clone());
     _pendingExamplesIdByContext[_cursor].append(id);
     _currTags := "";
+    return id;
+  }
+
+  integer _repeatingContextIndex;
+  action repeatContextsId(string text) returns integer {
+    integer id := __contexts.keys()[_repeatingContextIndex];
+    _repeatingContextIndex := _repeatingContextIndex + 1;
+    return id;
+  }
+
+  integer _repeatingExampleIndex;
+  action repeatExamplesId(string text) returns integer {
+    integer id := __examples.keys()[_repeatingExampleIndex];
+    _repeatingExampleIndex := _repeatingExampleIndex + 1;
     return id;
   }
 
@@ -84,7 +99,8 @@ event SpecRunner {
 
   action _doSpawn() {
     prepareDiscovery();
-    spawn _runEntry;
+    discoverAllExamples();
+    spawn _runEntry();
   }
 
   action prepareDiscovery() {
@@ -92,11 +108,36 @@ event SpecRunner {
     addSpec := discoverExample;
   }
 
+  action discoverAllExamples() {
+    _entryPoint();
+    _openContexts(disableDiscovery);
+  }
+
+  action _openContexts(action<> nextStep) {
+    if _pendingContextsId.size() > 0 then {
+      _cursor := _pendingContextsId[0];
+      _updateCurrentContext(_cursor);
+      route Spec(_cursor);
+      on completed Spec(_cursor) {
+        _pendingContextsId.remove(0);
+        _openContexts(nextStep);
+      }
+    } else {
+      nextStep();
+      die;
+    }
+  }
+
   action _runEntry() {
     __currContext := _createRootContext(self._specId);
     _listenProgressionEvents();
     _entryPoint();
     _runContext();
+  }
+
+  action disableDiscovery() {
+    addContext := repeatContextsId;
+    addSpec := repeatExamplesId;
   }
 
   action _runContext() {
@@ -167,8 +208,15 @@ event SpecRunner {
   sequence<integer> _pendingContextsId;
   sequence<string> _exampleRootsTags;
   dictionary<integer, sequence<integer> > _pendingExamplesIdByContext;
+
+  // Holds all contexts, its is populated in the first run and should be
+  // read-only after discovery is done
   dictionary<integer, _ContextDescription> __contexts;
+
+  // Holds all examples, it is populated in the first run and should be
+  // read-only after discovery is done
   dictionary<integer, _SpecDescription> __examples;
+
   _ContextDescription __currContext;
   chunk __deadWeight;
 }
