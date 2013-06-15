@@ -48,7 +48,7 @@ event _SpecDone {
 event _ContextDescription {
   wildcard integer id;
   wildcard string text;
-  wildcard sequence<integer> parentContextsId;
+  wildcard sequence<integer> idSequenceToOpen;
 }
 
 /** @private */

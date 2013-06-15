@@ -14,7 +14,7 @@ event SpecRunner {
   action<string> returns integer addContext;
   action discoverContext(string text) returns integer {
     integer id := _getId();
-    __contexts[id] := _ContextDescription(id, text, __currContext.parentContextsId.clone());
+    __contexts[id] := _ContextDescription(id, text, __currContext.idSequenceToOpen.clone());
     enqueuePendingContextId(id);
 
     _exampleRootsTags.append(_currTags);
@@ -26,7 +26,7 @@ event SpecRunner {
   action<string> returns integer addSpec;
   action discoverExample(string text) returns integer {
     integer id := _getId();
-    __examples[id] := _SpecDescription(id, text, __currContext.parentContextsId.clone());
+    __examples[id] := _SpecDescription(id, text, __currContext.idSequenceToOpen.clone());
     enqueuePendingExampleId(id);
 
     _currTags := "";
@@ -112,6 +112,7 @@ event SpecRunner {
   }
 
   action discoverAllExamples(action<> nextStep) {
+    __currContext := _createRootContext(self._specId);
     prepareDiscovery();
     rewindSpecMonitor();
     openContextsForDiscovery(nextStep);
@@ -126,6 +127,7 @@ event SpecRunner {
     if _pendingContextsId.size() > 0 then {
       _cursor := _pendingContextsId[0];
       _updateCurrentContext(_cursor);
+
       route Spec(_cursor);
       on completed Spec(_cursor) {
         _pendingContextsId.remove(0);
@@ -150,7 +152,6 @@ event SpecRunner {
   }
 
   action _runEntry() {
-    __currContext := _createRootContext(self._specId);
     _listenProgressionEvents();
     rewindSpecMonitor();
     _runContext();
@@ -164,7 +165,6 @@ event SpecRunner {
   action _runContext() {
     if _pendingContextsId.size() > 0 then {
       _cursor := _pendingContextsId[0];
-      _updateCurrentContext(_cursor);
 
       route Spec(_cursor);
       on completed Spec(_cursor) {
@@ -214,13 +214,13 @@ event SpecRunner {
   action _createRootContext(integer id) returns _ContextDescription {
     _ContextDescription c := new _ContextDescription;
     c.id := id;
-    c.parentContextsId := [ROOT_ID];
+    c.idSequenceToOpen := [];
     return c;
   }
 
   action _updateCurrentContext(integer id) {
     __currContext := __contexts[id];
-    __currContext.parentContextsId.append(id);
+    __currContext.idSequenceToOpen.append(id);
   }
 
   action<> _entryPoint;
