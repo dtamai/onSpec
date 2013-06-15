@@ -31,7 +31,6 @@ event SpecRunner {
     return id;
   }
 
-  integer _repeatingContextIndex;
   action repeatContextsId(string text) returns integer {
     integer id := __contexts.keys()[_repeatingContextIndex];
     enqueuePendingContextId(id);
@@ -39,21 +38,11 @@ event SpecRunner {
     return id;
   }
 
-  integer _repeatingExampleIndex;
   action repeatExamplesId(string text) returns integer {
     integer id := __examples.keys()[_repeatingExampleIndex];
     enqueuePendingExampleId(id);
     _repeatingExampleIndex := _repeatingExampleIndex + 1;
     return id;
-  }
-
-  action enqueuePendingContextId(integer contextId) {
-    _pendingContextsId.append(contextId);
-    _pendingExamplesIdByContext.add(contextId, new sequence<integer>);
-  }
-
-  action enqueuePendingExampleId(integer exampleId) {
-    _pendingExamplesIdByContext[_cursor].append(exampleId);
   }
 
   action addTags(string tags) {
@@ -69,42 +58,8 @@ event SpecRunner {
 
   // privates
 
-  action _getCurrentContext() returns sequence<string> {
-    return _buildContextForExample(_cursor);
-  }
-
-  action _buildContextForExample(integer exampleId) returns sequence<string> {
-    sequence<string> contexts := [];
-    integer ctxId;
-    for ctxId in __examples[exampleId].parentContextsId {
-      contexts.append(__contexts[ctxId].text);
-    }
-    contexts.append(__examples[exampleId].text);
-    return contexts;
-  }
-
   action _getId() returns integer{
     return integer.getUnique();
-  }
-
-  action _listenProgressionEvents() {
-    Skip s;
-    on all Skip():s {
-      route _Skip(_getCurrentContext());
-    }
-
-    on all Success() {
-      route _Success();
-    }
-
-    Failure f;
-    on all Failure():f {
-      route _Failure(f.reason, _getCurrentContext());
-    }
-
-    on all Done() {
-      route _SpecDone(_cursor);
-    }
   }
 
   action discoverAllExamples(action<> nextStep) {
@@ -136,6 +91,11 @@ event SpecRunner {
     }
   }
 
+  action disableDiscovery() {
+    addContext := repeatContextsId;
+    addSpec := repeatExamplesId;
+  }
+
   action rewindSpecMonitor() {
     _repeatingContextIndex := 0;
     _repeatingExampleIndex := 0;
@@ -151,11 +111,6 @@ event SpecRunner {
     _listenProgressionEvents();
     rewindSpecMonitor();
     _runContext();
-  }
-
-  action disableDiscovery() {
-    addContext := repeatContextsId;
-    addSpec := repeatExamplesId;
   }
 
   action _runContext() {
@@ -206,6 +161,29 @@ event SpecRunner {
     }
   }
 
+  action enqueuePendingContextId(integer contextId) {
+    _pendingContextsId.append(contextId);
+    _pendingExamplesIdByContext.add(contextId, new sequence<integer>);
+  }
+
+  action enqueuePendingExampleId(integer exampleId) {
+    _pendingExamplesIdByContext[_cursor].append(exampleId);
+  }
+
+  action _getCurrentContext() returns sequence<string> {
+    return _buildContextForExample(_cursor);
+  }
+
+  action _buildContextForExample(integer exampleId) returns sequence<string> {
+    sequence<string> contexts := [];
+    integer ctxId;
+    for ctxId in __examples[exampleId].parentContextsId {
+      contexts.append(__contexts[ctxId].text);
+    }
+    contexts.append(__examples[exampleId].text);
+    return contexts;
+  }
+
   action _createRootContext(integer id) returns _ContextDescription {
     _ContextDescription c := new _ContextDescription;
     c.id := id;
@@ -216,6 +194,26 @@ event SpecRunner {
   action _updateCurrentContext(integer id) {
     __currContext := __contexts[id];
     __currContext.idSequenceToOpen.append(id);
+  }
+
+  action _listenProgressionEvents() {
+    Skip s;
+    on all Skip():s {
+      route _Skip(_getCurrentContext());
+    }
+
+    on all Success() {
+      route _Success();
+    }
+
+    Failure f;
+    on all Failure():f {
+      route _Failure(f.reason, _getCurrentContext());
+    }
+
+    on all Done() {
+      route _SpecDone(_cursor);
+    }
   }
 
   action<> _entryPoint;
@@ -232,6 +230,9 @@ event SpecRunner {
   // Holds all examples, it is populated in the first run and should be
   // read-only after discovery is done
   dictionary<integer, _SpecDescription> __examples;
+
+  integer _repeatingContextIndex;
+  integer _repeatingExampleIndex;
 
   _ContextDescription __currContext;
   chunk __deadWeight;
