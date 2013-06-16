@@ -1,0 +1,24 @@
+package com.dtamai.onspec.expectation;
+
+event DecimalValue {
+  wildcard decimal actual;
+
+  /** @private */
+  action testFailed(decimal expected, string expectation) {
+    string reason := actual.toString() + " expected to be " + expectation +
+                     " " + expected.toString();
+    com.dtamai.onspec.SpecReporter().fail(reason);
+  }
+
+  action mustBe(decimal expected) {
+    if not expected = actual then {
+      testFailed(expected, "equal");
+    }
+  }
+
+  action mustNotBe(decimal expected) {
+    if expected = actual then {
+      testFailed(expected, "not equal");
+    }
+  }
+}

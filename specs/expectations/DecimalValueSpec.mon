@@ -1,0 +1,27 @@
+package com.dtamai.onspec;
+
+using com.dtamai.onspec.expectation.DecimalValue;
+
+monitor DecimalValueSpec {
+  Suite _;
+
+  action onload() {
+    _.init(run);
+  }
+
+  action run() {
+    on Spec(_.describe("DecimalValue")) {
+      on Spec(_.it("verifies decimal values")) {
+        DecimalValue(1.d).mustBe(1.d);
+        DecimalValue(2.d).mustNotBe(3.d);
+        _.done();
+      }
+
+      on Spec(_.it("works with negative decimals")) {
+        DecimalValue(-1.d).mustBe(-1.d);
+        DecimalValue(-2.d).mustNotBe(3.d);
+        _.done();
+      }
+    }
+  }
+}
