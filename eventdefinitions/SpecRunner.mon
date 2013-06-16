@@ -3,20 +3,27 @@ package com.dtamai.onspec;
 /** @private */
 event SpecRunner {
 
-  integer _specId;
-
-  //TODO: configuration?
-  constant float timeout := 0.2;
-
-  dictionary<string /*text*/, integer /*id*/> contextsMap;
-  sequence<integer /*id*/> contextsOrder;
   action<string> returns integer addContext;
+  action<string> returns integer addSpec;
+
+  action addTags(string tags) {
+    _currTags := tags;
+  }
+
+  action run(action<> runnable, integer specId) {
+    self.specId := specId;
+    specsMonitorEntryPoint := runnable;
+    discoverAllExamples(doSpawn);
+  }
+
+
+  // privates
+
   action discoverContext(string text) returns integer {
-    integer id := _getId();
-    __contexts[id] := _ContextDescription(id, text, __currContext.idSequenceToOpen.clone());
-    contextsMap[text] := id;
-    contextsOrder.append(id);
-    _pendingContextsId.append(id);
+    integer id := getId();
+    storeContext(text, id);
+
+    pendingContextsId.append(id);
 
     _exampleRootsTags.append(_currTags);
     _currTags := "";
@@ -24,14 +31,9 @@ event SpecRunner {
     return id;
   }
 
-  dictionary<string /*text*/, integer /*id*/> examplesMap;
-  sequence<integer /*id*/> examplesOrder;
-  action<string> returns integer addSpec;
   action discoverExample(string text) returns integer {
-    integer id := _getId();
-    examplesMap[text] := id;
-    examplesOrder.append(id);
-    __examples[id] := _SpecDescription(id, text, __currContext.idSequenceToOpen.clone());
+    integer id := getId();
+    storeExample(text, id);
 
     _currTags := "";
 
@@ -46,25 +48,24 @@ event SpecRunner {
     return examplesMap[text];
   }
 
-  action addTags(string tags) {
-    _currTags := tags;
+  action storeContext(string text, integer id) {
+    contexts[id] := _ContextDescription(id, text, surroundingContext.idSequenceToOpen.clone());
+    contextsMap[text] := id;
+    contextsOrder.append(id);
   }
 
-  action run(action<> runnable, integer specId) {
-    self._specId := specId;
-    _entryPoint := runnable;
-    discoverAllExamples(_doSpawn);
+  action storeExample(string text, integer id) {
+    examplesMap[text] := id;
+    examplesOrder.append(id);
+    examples[id] := _SpecDescription(id, text, surroundingContext.idSequenceToOpen.clone());
   }
 
-
-  // privates
-
-  action _getId() returns integer{
+  action getId() returns integer{
     return integer.getUnique();
   }
 
   action discoverAllExamples(action<> nextStep) {
-    __currContext := _createRootContext(self._specId);
+    surroundingContext := createRootContext(self.specId);
     prepareDiscovery();
     rewindSpecMonitor();
     openContextsForDiscovery(nextStep);
@@ -76,13 +77,13 @@ event SpecRunner {
   }
 
   action openContextsForDiscovery(action<> nextStep) {
-    if _pendingContextsId.size() > 0 then {
-      _cursor := _pendingContextsId[0];
-      _updateCurrentContext(_cursor);
+    if pendingContextsId.size() > 0 then {
+      cursor := pendingContextsId[0];
+      updateCurrentContext(cursor);
 
-      route Spec(_cursor);
-      on completed Spec(_cursor) {
-        _pendingContextsId.remove(0);
+      route Spec(cursor);
+      on completed Spec(cursor) {
+        pendingContextsId.remove(0);
         openContextsForDiscovery(nextStep);
       }
     } else {
@@ -98,20 +99,19 @@ event SpecRunner {
   }
 
   action rewindSpecMonitor() {
-    _entryPoint();
-    _cursor := contextsOrder[0];
+    specsMonitorEntryPoint();
+    cursor := contextsOrder[0];
   }
 
-  action _doSpawn() {
-    spawn _runEntry();
+  action doSpawn() {
+    spawn runEntry();
   }
 
-  action _runEntry() {
-    _listenProgressionEvents();
+  action runEntry() {
+    listenProgressionEvents();
     runExamples();
   }
 
-  sequence<integer> pendingExamplesId;
   action runExamples() {
     pendingExamplesId := examplesOrder.clone();
     runFirstExample();
@@ -120,25 +120,25 @@ event SpecRunner {
   action runFirstExample() {
     if pendingExamplesId.size() > 0 then {
       integer exId := pendingExamplesId[0];
-      _cursor := exId;
+      cursor := exId;
 
-      spawn _reallyRun(exId);
+      spawn runExample(exId);
       on _SpecDone(exId) {
         pendingExamplesId.remove(0);
         runFirstExample();
       }
     } else {
-      route _SpecEnd(self._specId);
+      route _SpecEnd(self.specId);
       die;
     }
   }
 
-  action _reallyRun(integer exampleId) {
+  action runExample(integer exampleId) {
     rewindSpecMonitor();
-    _SpecDescription example := __examples[exampleId];
+    _SpecDescription example := examples[exampleId];
 
     integer ctxId;
-    for ctxId in __examples[exampleId].parentContextsId {
+    for ctxId in examples[exampleId].parentContextsId {
       route Spec(ctxId);
     }
 
@@ -151,36 +151,32 @@ event SpecRunner {
     }
   }
 
-  action _getCurrentContext() returns sequence<string> {
-    return _buildContextForExample(_cursor);
-  }
-
-  action _buildContextForExample(integer exampleId) returns sequence<string> {
-    sequence<string> contexts := [];
+  action getCurrentContextDescriptionList() returns sequence<string> {
+    sequence<string> ctxList := [];
     integer ctxId;
-    for ctxId in __examples[exampleId].parentContextsId {
-      contexts.append(__contexts[ctxId].text);
+    for ctxId in examples[cursor].parentContextsId {
+      ctxList.append(contexts[ctxId].text);
     }
-    contexts.append(__examples[exampleId].text);
-    return contexts;
+    ctxList.append(examples[cursor].text);
+    return ctxList;
   }
 
-  action _createRootContext(integer id) returns _ContextDescription {
+  action createRootContext(integer id) returns _ContextDescription {
     _ContextDescription c := new _ContextDescription;
     c.id := id;
     c.idSequenceToOpen := [];
     return c;
   }
 
-  action _updateCurrentContext(integer id) {
-    __currContext := __contexts[id];
-    __currContext.idSequenceToOpen.append(id);
+  action updateCurrentContext(integer id) {
+    surroundingContext := contexts[id];
+    surroundingContext.idSequenceToOpen.append(id);
   }
 
-  action _listenProgressionEvents() {
+  action listenProgressionEvents() {
     Skip s;
     on all Skip():s {
-      route _Skip(_getCurrentContext());
+      route _Skip(getCurrentContextDescriptionList());
     }
 
     on all Success() {
@@ -189,28 +185,53 @@ event SpecRunner {
 
     Failure f;
     on all Failure():f {
-      route _Failure(f.reason, _getCurrentContext());
+      route _Failure(f.reason, getCurrentContextDescriptionList());
     }
 
     on all Done() {
-      route _SpecDone(_cursor);
+      route _SpecDone(cursor);
     }
   }
 
-  action<> _entryPoint;
+  // Identifies the client monitor
+  integer specId;
+
+  //TODO: configuration?
+  constant float timeout := 0.2;
+
+  // Action in the client monitor that contains the specs
+  action<> specsMonitorEntryPoint;
+
+  dictionary<string /*text*/, integer /*id*/> contextsMap;
+  sequence<integer /*id*/> contextsOrder;
+  dictionary<string /*text*/, integer /*id*/> examplesMap;
+  sequence<integer /*id*/> examplesOrder;
+
   string _currTags;
-  integer _cursor;
-  sequence<integer> _pendingContextsId;
   sequence<string> _exampleRootsTags;
 
-  // Holds all contexts, its is populated in the first run and should be
-  // read-only after discovery is done
-  dictionary<integer, _ContextDescription> __contexts;
+  // Current context/example. While in discovery, its value is the current
+  // context; while running examples, its value is the current example
+  // This variable is not relevant for the monitor that is spawned to run
+  // examples
+  integer cursor;
 
-  // Holds all examples, it is populated in the first run and should be
-  // read-only after discovery is done
-  dictionary<integer, _SpecDescription> __examples;
+  // Used while discovering examples, holds the _ContextDescription of the
+  // most internal context that is outside the current context.
+  _ContextDescription surroundingContext;
 
-  _ContextDescription __currContext;
+  // Used while discovering examples, holds the ids of contexts still closed
+  sequence<integer> pendingContextsId;
+  // Used while running examples, is a modifiable copy of the examples list
+  sequence<integer> pendingExamplesId;
+
+  // Holds all contexts, its is populated in the first run and must be
+  // read-only after discovery is done
+  dictionary<integer /*id*/, _ContextDescription> contexts;
+
+  // Holds all examples, it is populated in the first run and must be
+  // read-only after discovery is done
+  dictionary<integer /*id*/, _SpecDescription> examples;
+
   chunk __deadWeight;
 }
