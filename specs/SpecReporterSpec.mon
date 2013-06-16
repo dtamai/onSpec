@@ -1,0 +1,73 @@
+package com.dtamai.onspec;
+
+event SpecReporterSpec_Passed {}
+monitor SpecReporterSpec {
+
+  Suite _;
+
+  action onload() {
+    _.init(run);
+  }
+
+  action run() {
+    on Spec(_.describe("SpecReporter")) {
+      on Spec(_.it("terminates tests")) {
+        spawn testTerminate to context("isolated");
+        on SpecReporterSpec_Passed() {
+          _.pass();
+        }
+      }
+
+      on Spec(_.it("terminates after success")) {
+        spawn testSuccessThenTerminate to context("isolated");
+        on SpecReporterSpec_Passed() {
+          _.pass();
+        }
+      }
+
+      on Spec(_.it("terminates after failure")) {
+        spawn testFailThenTerminate to context("isolated");
+        on SpecReporterSpec_Passed() {
+          _.pass();
+        }
+      }
+
+      on Spec(_.it("terminates after skip")) {
+        spawn testSkipThenTerminate to context("isolated");
+        on SpecReporterSpec_Passed() {
+          _.pass();
+        }
+      }
+    }
+  }
+
+  action testTerminate() {
+    on Done() { enqueue SpecReporterSpec_Passed(); }
+
+    SpecReporter().done();
+  }
+
+  action testSuccessThenTerminate() {
+    on Success() -> Done() { enqueue SpecReporterSpec_Passed(); }
+
+    SpecReporter().pass();
+  }
+
+  action testFailThenTerminate() {
+    string reason := "SpecReportSpec failed";
+    Failure f;
+    on Failure():f -> Done() {
+      if f.reason = reason then {
+        enqueue SpecReporterSpec_Passed();
+      }
+    }
+
+    SpecReporter().fail(reason);
+  }
+
+  action testSkipThenTerminate() {
+    on Skip() -> Done() { enqueue SpecReporterSpec_Passed(); }
+
+    SpecReporter().skip();
+  }
+}
