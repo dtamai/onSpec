@@ -14,10 +14,8 @@ monitor SuiteSpec {
   action run() {
     on Spec(_.describe("Suite")) {
       on Spec(_.it("generates an unique id after initialization")) {
-        Suite suite1 := new Suite;
-        Suite suite2 := new Suite;
-        suite1.init(dummy);
-        suite2.init(dummy);
+        Suite suite1 := dummySuite();
+        Suite suite2 := dummySuite();
 
         IntegerValue(suite1.getId()).mustNotBe(suite2.getId());
         _.done();
@@ -35,10 +33,15 @@ monitor SuiteSpec {
   action testAnswerSpecDiscover() {
     on _SpecPresent() { enqueue SuiteSpec_Passed(); }
 
-    Suite suite := new Suite;
-    suite.init(dummy);
+    Suite suite := dummySuite();
     route NewSuite();
     route _SpecDiscover();
+  }
+
+  action dummySuite() returns Suite {
+    Suite s := new Suite;
+    s.init(dummy);
+    return s;
   }
 
   action dummy() {}
