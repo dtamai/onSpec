@@ -15,6 +15,12 @@ event Suite {
   /** @private */
   SpecReporter _reporter;
 
+  /** @private */
+  listener waitNewSuite;
+
+  /** @private */
+  listener waitSpecBegin;
+
   /**
    * Create a context to group examples.
    * It should be used to define the id param for a Spec event.
@@ -43,9 +49,21 @@ event Suite {
    */
   action init(action<> runnable) {
     self._id := integer.getUnique();
-    on all NewSuite() -> _SpecDiscover() {
+
+    terminate();
+    waitNewSuite := on all NewSuite() -> _SpecDiscover() {
       spawn _handleNewSuite(runnable);
     }
+  }
+
+  /**
+   * Action to terminate the suite.
+   * When terminated, the suite doesn't respond to NewSuite, but will not stop
+   * pending specs.
+   */
+  action terminate() {
+    waitNewSuite.quit();
+    waitSpecBegin.quit();
   }
 
   /**
@@ -81,6 +99,13 @@ event Suite {
    */
   action done() {
     _reporter.pass();
+  }
+
+  /**
+   * Returns this Suite's id
+   */
+  action getId() returns integer {
+    return self._id;
   }
 
   /** @private */

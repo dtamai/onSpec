@@ -1,0 +1,45 @@
+package com.dtamai.onspec;
+
+using com.dtamai.onspec.expectation.IntegerValue;
+
+event SuiteSpec_Passed {}
+
+monitor SuiteSpec {
+  Suite _;
+
+  action onload() {
+    _.init(run);
+  }
+
+  action run() {
+    on Spec(_.describe("Suite")) {
+      on Spec(_.it("generates an unique id after initialization")) {
+        Suite suite1 := new Suite;
+        Suite suite2 := new Suite;
+        suite1.init(dummy);
+        suite2.init(dummy);
+
+        IntegerValue(suite1.getId()).mustNotBe(suite2.getId());
+        _.done();
+      }
+
+      on Spec(_.it("answers to SpecDiscover")) {
+        spawn testAnswerSpecDiscover to context("isolated");
+        on SuiteSpec_Passed() {
+          _.pass();
+        }
+      }
+    }
+  }
+
+  action testAnswerSpecDiscover() {
+    on _SpecPresent() { enqueue SuiteSpec_Passed(); }
+
+    Suite suite := new Suite;
+    suite.init(dummy);
+    route NewSuite();
+    route _SpecDiscover();
+  }
+
+  action dummy() {}
+}
