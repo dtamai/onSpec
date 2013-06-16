@@ -35,11 +35,6 @@ event Suite {
     return _runner.addSpec(text);
   }
 
-  /** @private */
-  action T(string tags) {
-    _runner.addTags(tags);
-  }
-
   /**
    * Action to initialize the suite. It needs to be called before a NewSuite.
    * @param runnable The action that contains the contexts and example (Spec listeners)

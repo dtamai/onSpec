@@ -64,7 +64,6 @@ monitor onSpecSample {
       }
     }
 
-    $.T("slow");
     on Spec($.describe("The third example")) {
       on Spec($.it("has also has something to say")) {
         route SampleResponse(". . .");

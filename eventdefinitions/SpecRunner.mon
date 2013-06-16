@@ -6,10 +6,6 @@ event SpecRunner {
   action<string> returns integer addContext;
   action<string> returns integer addSpec;
 
-  action addTags(string tags) {
-    _currTags := tags;
-  }
-
   action run(action<> runnable, integer specId) {
     self.specId := specId;
     specsMonitorEntryPoint := runnable;
@@ -25,17 +21,12 @@ event SpecRunner {
 
     pendingContextsId.append(id);
 
-    _exampleRootsTags.append(_currTags);
-    _currTags := "";
-
     return id;
   }
 
   action discoverExample(string text) returns integer {
     integer id := getId();
     storeExample(text, id);
-
-    _currTags := "";
 
     return id;
   }
@@ -206,9 +197,6 @@ event SpecRunner {
   sequence<integer /*id*/> contextsOrder;
   dictionary<string /*text*/, integer /*id*/> examplesMap;
   sequence<integer /*id*/> examplesOrder;
-
-  string _currTags;
-  sequence<string> _exampleRootsTags;
 
   // Current context/example. While in discovery, its value is the current
   // context; while running examples, its value is the current example
