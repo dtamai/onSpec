@@ -1,0 +1,27 @@
+package com.dtamai.onspec;
+
+event Shuffler {
+
+  // Using Durstenfeld's version of Fisher-Yattes shuffle algorithm
+  // http://en.wikipedia.org/wiki/Fisher-Yates_shuffle#The_modern_algorithm
+  action shuffle(sequence<integer> source) returns sequence<integer> {
+    integer n := source.size();
+    integer j;
+    integer i := 1;
+
+    sequence<integer> a := [];
+    a.setSize(n);
+
+    a[0] := source[0];
+    while i <= n - 1 {
+      j := (i + 1).rand();
+      a[i] := a[j];
+      a[j] := source[i];
+
+      i := i + 1;
+    }
+
+    return a;
+  }
+}
+
