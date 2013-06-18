@@ -1,6 +1,8 @@
 package com.dtamai.onspec;
 
+/** @private */
 event Shuffler {
+  RandomGenerator rand;
 
   // Using Durstenfeld's version of Fisher-Yattes shuffle algorithm
   // http://en.wikipedia.org/wiki/Fisher-Yates_shuffle#The_modern_algorithm
@@ -14,7 +16,7 @@ event Shuffler {
 
     a[0] := source[0];
     while i <= n - 1 {
-      j := (i + 1).rand();
+      j := rand.upTo(i + 1);
       a[i] := a[j];
       a[j] := source[i];
 

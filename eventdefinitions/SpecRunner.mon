@@ -104,7 +104,7 @@ event SpecRunner {
   }
 
   action runExamples() {
-    pendingExamplesId := examplesOrder.clone();
+    pendingExamplesId := Shuffler(new RandomGenerator).shuffle(examplesOrder);
     runFirstExample();
   }
 

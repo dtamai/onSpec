@@ -1,0 +1,32 @@
+package com.dtamai.onspec;
+
+/** @private */
+event RandomGenerator {
+
+  // Uses Linear congruential generator algorithm
+  // http://en.wikipedia.org/wiki/Linear_congruential_generator
+  // Parameters from Numerical Recipies
+  constant integer m := 4294967296;
+  constant integer a := 1664525;
+  constant integer c := 1013904223;
+
+  wildcard integer x0;
+  wildcard boolean initialized;
+
+  action init(integer seed) {
+    x0 := seed;
+    initialized := true;
+  }
+
+  action next() returns integer {
+    if not initialized then {
+      init(m.rand());
+    }
+    return (a * x0 + c) % m;
+  }
+
+  action upTo(integer max) returns integer {
+    return next() % max;
+  }
+}
+
