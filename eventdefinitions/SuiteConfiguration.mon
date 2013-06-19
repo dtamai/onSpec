@@ -1,0 +1,35 @@
+package com.dtamai.onspec;
+
+event SuiteConfiguration {
+  dictionary<string, string> config;
+
+  action randomSeedParamName() returns string { return "randomSeed"; }
+  action randomSeedDefaultValue() returns integer { return 1; }
+
+  action hasRandomSeed() returns boolean {
+    return hasParam(randomSeedParamName());
+  }
+
+  action getRandomSeed() returns integer {
+    return getIntegerOrElse(randomSeedParamName(), randomSeedDefaultValue());
+  }
+
+  action hasParam(string param) returns boolean {
+    return config.hasKey(param);
+  }
+
+  action getIntegerOrElse(string param, integer orElse) returns integer {
+    integer value := orElse;
+    if config.hasKey(param) then {
+      string stringValue := config[param];
+      if integer.canParse(stringValue) then {
+        value := integer.parse(stringValue);
+      } else {
+        log "Expected a parseable integer for '" + param + "', received '" + stringValue + "'" at ERROR;
+      }
+    }
+
+    return value;
+  }
+}
+
