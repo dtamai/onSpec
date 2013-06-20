@@ -6,9 +6,10 @@ event SpecRunner {
   action<string> returns integer addContext;
   action<string> returns integer addSpec;
 
-  action run(action<> runnable, integer specId) {
+  action run(action<> runnable, integer specId, SuiteConfiguration config) {
     self.specId := specId;
     specsMonitorEntryPoint := runnable;
+    self.config := config;
     discoverAllExamples(doSpawn);
   }
 
@@ -104,7 +105,7 @@ event SpecRunner {
   }
 
   action runExamples() {
-    pendingExamplesId := Shuffler(new RandomGenerator).shuffle(examplesOrder);
+    pendingExamplesId := defineExamplesOrder(examplesOrder);
     runFirstExample();
   }
 
@@ -184,6 +185,18 @@ event SpecRunner {
     }
   }
 
+  action defineExamplesOrder(sequence<integer> list) returns sequence<integer> {
+    if config.shouldRandomize() then {
+      RandomGenerator generator := new RandomGenerator;
+      if config.hasRandomSeed() then {
+        generator.init(config.getRandomSeed());
+      }
+      return Shuffler(generator).shuffle(list);
+    } else {
+      return list;
+    }
+  }
+
   // Identifies the client monitor
   integer specId;
 
@@ -220,6 +233,9 @@ event SpecRunner {
   // Holds all examples, it is populated in the first run and must be
   // read-only after discovery is done
   dictionary<integer /*id*/, _SpecDescription> examples;
+
+  // Global suite configuration
+  SuiteConfiguration config;
 
   chunk __deadWeight;
 }
