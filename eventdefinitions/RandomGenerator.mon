@@ -11,6 +11,7 @@ event RandomGenerator {
   constant integer c := 1013904223;
 
   wildcard integer x0;
+  wildcard integer x1;
   wildcard boolean initialized;
 
   action init(integer seed) {
@@ -22,7 +23,9 @@ event RandomGenerator {
     if not initialized then {
       init(m.rand());
     }
-    return (a * x0 + c) % m;
+    x1 := (a * x0 + c) % m;
+    x0 := x1;
+    return x1;
   }
 
   action upTo(integer max) returns integer {
