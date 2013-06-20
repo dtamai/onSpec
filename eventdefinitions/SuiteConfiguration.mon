@@ -6,12 +6,18 @@ event SuiteConfiguration {
   action randomSeedParamName() returns string { return "randomSeed"; }
   action randomSeedDefaultValue() returns integer { return 1; }
 
+  action doNotRandomizeOrderParamName() returns string { return "doNotRandomizeOrder_I_WRITE_BAD_TESTS"; }
+
   action hasRandomSeed() returns boolean {
     return hasParam(randomSeedParamName());
   }
 
   action getRandomSeed() returns integer {
     return getIntegerOrElse(randomSeedParamName(), randomSeedDefaultValue());
+  }
+
+  action shouldRandomize() returns boolean {
+    return not hasParam(doNotRandomizeOrderParamName());
   }
 
   action hasParam(string param) returns boolean {
