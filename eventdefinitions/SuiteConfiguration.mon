@@ -8,6 +8,9 @@ event SuiteConfiguration {
 
   action doNotRandomizeOrderParamName() returns string { return "doNotRandomizeOrder_I_WRITE_BAD_TESTS"; }
 
+  action timeoutParamName() returns string { return "timeout"; }
+  action timeoutDefaultValue() returns float { return 0.2; }
+
   action hasRandomSeed() returns boolean {
     return hasParam(randomSeedParamName());
   }
@@ -22,6 +25,10 @@ event SuiteConfiguration {
 
   action setRandomSeed(integer seed) {
     setIntegerParam(randomSeedParamName(), seed);
+  }
+
+  action getTimeout() returns float {
+    return getFloatOrElse(timeoutParamName(), timeoutDefaultValue());
   }
 
   action hasParam(string param) returns boolean {
@@ -42,8 +49,22 @@ event SuiteConfiguration {
     return value;
   }
 
-  action setIntegerParam(string paramName, integer value) {
-    config[paramName] := value.toString();
+  action setIntegerParam(string param, integer value) {
+    config[param] := value.toString();
+  }
+
+  action getFloatOrElse(string param, float orElse) returns float {
+    float value := orElse;
+    if config.hasKey(param) then {
+      string stringValue := config[param];
+      if float.canParse(stringValue) then {
+        value := float.parse(stringValue);
+      } else {
+        log "Expected a parseable float for '" + param + "', received '" + stringValue + "'" at ERROR;
+      }
+    }
+
+    return value;
   }
 }
 

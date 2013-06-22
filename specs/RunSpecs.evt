@@ -1,2 +1,2 @@
-com.dtamai.onspec.SuiteConfiguration({"randomSeed":"12345"})
+com.dtamai.onspec.SuiteConfiguration({"randomSeed":"12345", "timeout":"0.1"})
 com.dtamai.onspec.NewSuite()

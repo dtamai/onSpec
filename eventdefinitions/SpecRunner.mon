@@ -135,7 +135,7 @@ event SpecRunner {
     }
 
     route Spec(exampleId);
-    on wait (timeout) {
+    on wait (config.getTimeout()) {
       SpecReporter().fail("timeout");
     }
     on _SpecDone(exampleId) {
@@ -197,9 +197,6 @@ event SpecRunner {
 
   // Identifies the client monitor
   integer specId;
-
-  //TODO: configuration?
-  constant float timeout := 0.2;
 
   // Action in the client monitor that contains the specs
   action<> specsMonitorEntryPoint;
