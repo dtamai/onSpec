@@ -188,9 +188,7 @@ event SpecRunner {
   action defineExamplesOrder(sequence<integer> list) returns sequence<integer> {
     if config.shouldRandomize() then {
       RandomGenerator generator := new RandomGenerator;
-      if config.hasRandomSeed() then {
-        generator.init(config.getRandomSeed());
-      }
+      generator.init(config.getRandomSeed());
       return Shuffler(generator).shuffle(list);
     } else {
       return list;

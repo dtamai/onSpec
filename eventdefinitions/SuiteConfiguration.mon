@@ -20,6 +20,10 @@ event SuiteConfiguration {
     return not hasParam(doNotRandomizeOrderParamName());
   }
 
+  action setRandomSeed(integer seed) {
+    setIntegerParam(randomSeedParamName(), seed);
+  }
+
   action hasParam(string param) returns boolean {
     return config.hasKey(param);
   }
@@ -36,6 +40,10 @@ event SuiteConfiguration {
     }
 
     return value;
+  }
+
+  action setIntegerParam(string paramName, integer value) {
+    config[paramName] := value.toString();
   }
 }
 

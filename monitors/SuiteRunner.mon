@@ -22,7 +22,9 @@ monitor SuiteRunner {
 
   /** @private */
   action onload() {
-    on all SuiteConfiguration():config {}
+    on all SuiteConfiguration():config {
+      handleConfiguration();
+    }
 
     on all NewSuite() {
       beginTime := time.getMicroTime();
@@ -60,6 +62,18 @@ monitor SuiteRunner {
       skips.append("'" + expandContextString(s.context) + "' skipped");
     }
 
+  }
+
+  /** @private */
+  action handleConfiguration() {
+    if config.shouldRandomize() then {
+      if not config.hasRandomSeed() then {
+        config.setRandomSeed((new RandomGenerator).next());
+      }
+      print "Random seed: " + config.getRandomSeed().toString();
+    } else {
+      print "!! [WARN] Runing specs in order !!";
+    }
   }
 
   /** @private */
