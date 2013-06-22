@@ -13,6 +13,8 @@ monitor SuiteRunner {
   sequence<string> failures := [];
   /** @private */
   sequence<string> skips := [];
+  /** @private */
+  SuiteConfiguration config;
 
   import "TimeFormatPlugin" as time;
   /** @private */
@@ -20,6 +22,8 @@ monitor SuiteRunner {
 
   /** @private */
   action onload() {
+    on all SuiteConfiguration():config {}
+
     on all NewSuite() {
       beginTime := time.getMicroTime();
       spawn handleNewSuite;
@@ -63,7 +67,7 @@ monitor SuiteRunner {
     if specs.size() <= 0 then { endSuite(); }
 
     integer currId := specs[0];
-    route _SpecBegin(currId);
+    route _SpecBegin(currId, config);
     on _SpecEnd(currId) {
       specs.remove(0);
       runSpec();

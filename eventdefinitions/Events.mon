@@ -17,6 +17,7 @@ event Spec {
 /** @private */
 event _SpecBegin {
   integer id;
+  SuiteConfiguration config;
 }
 
 /** @private */

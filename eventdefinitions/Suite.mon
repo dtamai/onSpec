@@ -18,12 +18,6 @@ event Suite {
   /** @private */
   listener waitNewSuite;
 
-  /** @private */
-  listener listenConfig;
-
-  /** @private */
-  SuiteConfiguration config;
-
   /**
    * Create a context to group examples.
    * It should be used to define the id param for a Spec event.
@@ -55,13 +49,8 @@ event Suite {
 
     terminate();
 
-    SuiteConfiguration localConfig := new SuiteConfiguration;
-    listenConfig := on all SuiteConfiguration():localConfig {
-      config := localConfig;
-    }
-
     waitNewSuite := on all NewSuite() -> _SpecDiscover() {
-      spawn _handleNewSuite(runnable, config);
+      spawn _handleNewSuite(runnable);
     }
   }
 
@@ -72,7 +61,6 @@ event Suite {
    */
   action terminate() {
     waitNewSuite.quit();
-    listenConfig.quit();
   }
 
   /**
@@ -118,10 +106,11 @@ event Suite {
   }
 
   /** @private */
-  action _handleNewSuite(action<> runnable, SuiteConfiguration config) {
+  action _handleNewSuite(action<> runnable) {
     route _SpecPresent(self._id);
-    on _SpecBegin(_id) {
-      _runner.run(runnable, self._id, config);
+    _SpecBegin begin;
+    on _SpecBegin(id=_id):begin {
+      _runner.run(runnable, self._id, begin.config);
     }
   }
 }
