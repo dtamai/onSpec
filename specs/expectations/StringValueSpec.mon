@@ -1,6 +1,6 @@
-package com.dtamai.onspec;
+package org.onspec;
 
-using com.dtamai.onspec.expectation.StringValue;
+using org.onspec.expectation.StringValue;
 
 monitor StringValueSpec {
   Suite _;

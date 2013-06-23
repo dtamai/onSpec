@@ -1,6 +1,6 @@
-package com.dtamai.onspec;
+package org.onspec;
 
-using com.dtamai.onspec.expectation.FloatValue;
+using org.onspec.expectation.FloatValue;
 
 monitor FloatValueSpec {
   Suite _;

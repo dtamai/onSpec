@@ -1,4 +1,4 @@
-package com.dtamai.onspec.expectation;
+package org.onspec.expectation;
 
 event DecimalValue {
   wildcard decimal actual;
@@ -7,7 +7,7 @@ event DecimalValue {
   action testFailed(decimal expected, string expectation) {
     string reason := actual.toString() + " expected to be " + expectation +
                      " " + expected.toString();
-    com.dtamai.onspec.SpecReporter().fail(reason);
+    org.onspec.SpecReporter().fail(reason);
   }
 
   action mustBe(decimal expected) {

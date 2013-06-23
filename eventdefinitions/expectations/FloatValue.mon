@@ -1,4 +1,4 @@
-package com.dtamai.onspec.expectation;
+package org.onspec.expectation;
 
 event FloatValue {
   wildcard float actual;
@@ -9,7 +9,7 @@ event FloatValue {
                      " " + expected.toString() + 
                      " (within " + delta.toString() +
                      ")";
-    com.dtamai.onspec.SpecReporter().fail(reason);
+    org.onspec.SpecReporter().fail(reason);
   }
 
   /** @private */

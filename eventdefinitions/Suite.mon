@@ -1,4 +1,4 @@
-package com.dtamai.onspec;
+package org.onspec;
 
 /**
  * Facade event to make easy write specs.

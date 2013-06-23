@@ -1,4 +1,4 @@
-package com.dtamai.onspec.expectation;
+package org.onspec.expectation;
 
 event StringValue {
   wildcard string actual;
@@ -6,7 +6,7 @@ event StringValue {
   /** @private */
   action testFailed(string expected, string expectation) {
     string reason := "\"" + actual + "\" expected to " + expectation + " \"" + expected + "\"";
-    com.dtamai.onspec.SpecReporter().fail(reason);
+    org.onspec.SpecReporter().fail(reason);
   }
 
   action mustBe(string expected) {

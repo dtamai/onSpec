@@ -1,2 +1,2 @@
-com.dtamai.onspec.SuiteConfiguration({"timeout":"0.1"})
-com.dtamai.onspec.NewSuite()
+org.onspec.SuiteConfiguration({"timeout":"0.1"})
+org.onspec.NewSuite()

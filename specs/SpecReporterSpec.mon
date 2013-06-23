@@ -1,4 +1,4 @@
-package com.dtamai.onspec;
+package org.onspec;
 
 event SpecReporterSpec_Passed {}
 monitor SpecReporterSpec {

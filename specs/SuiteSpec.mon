@@ -1,6 +1,6 @@
-package com.dtamai.onspec;
+package org.onspec;
 
-using com.dtamai.onspec.expectation.IntegerValue;
+using org.onspec.expectation.IntegerValue;
 
 event SuiteSpec_Passed {}
 

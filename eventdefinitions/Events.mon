@@ -1,4 +1,4 @@
-package com.dtamai.onspec;
+package org.onspec;
 
 /**
  * Runs a context or an example. Listeners for this event defines code blocks

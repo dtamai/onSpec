@@ -1,4 +1,4 @@
-package com.dtamai.onspec;
+package org.onspec;
 
 event SuiteConfiguration {
   dictionary<string, string> config;

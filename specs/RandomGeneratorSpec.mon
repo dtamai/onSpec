@@ -1,7 +1,7 @@
-package com.dtamai.onspec;
+package org.onspec;
 
-using com.dtamai.onspec.expectation.IntegerValue;
-using com.dtamai.onspec.expectation.BooleanValue;
+using org.onspec.expectation.IntegerValue;
+using org.onspec.expectation.BooleanValue;
 
 monitor RandomGeneratorSpec {
   Suite _;

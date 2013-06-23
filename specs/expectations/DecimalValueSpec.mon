@@ -1,6 +1,6 @@
-package com.dtamai.onspec;
+package org.onspec;
 
-using com.dtamai.onspec.expectation.DecimalValue;
+using org.onspec.expectation.DecimalValue;
 
 monitor DecimalValueSpec {
   Suite _;

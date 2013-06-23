@@ -1,4 +1,4 @@
-package com.dtamai.onspec.expectation;
+package org.onspec.expectation;
 
 event BooleanValue {
   wildcard boolean actual;
@@ -14,7 +14,7 @@ event BooleanValue {
 
     string reason := actual.toString() + " expected to be " + 
                      expectation + sep + expected.toString();
-    com.dtamai.onspec.SpecReporter().fail(reason);
+    org.onspec.SpecReporter().fail(reason);
   }
 
   action mustBe(boolean expected) {

@@ -1,4 +1,4 @@
-﻿package com.dtamai.onspec;
+﻿package org.onspec;
 
 /*
 * Injecting this file should print '[GOOD] Working as expected' in the console
