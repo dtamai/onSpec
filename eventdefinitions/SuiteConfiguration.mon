@@ -6,32 +6,32 @@ event SuiteConfiguration {
   constant string kvPairSep := ", ";
   constant string kvSep := ":";
 
-  action randomSeedParamName() returns string { return "randomSeed"; }
-  action randomSeedDefaultValue() returns integer { return 1; }
+  constant string randomSeedParamName := "randomSeed";
+  constant integer randomSeedDefaultValue := 1;
 
-  action doNotRandomizeOrderParamName() returns string { return "doNotRandomizeOrder_I_WRITE_BAD_TESTS"; }
+  constant string doNotRandomizeOrderParamName := "doNotRandomizeOrder_I_WRITE_BAD_TESTS";
 
-  action timeoutParamName() returns string { return "timeout"; }
-  action timeoutDefaultValue() returns float { return 0.2; }
+  constant string timeoutParamName := "timeout";
+  constant float timeoutDefaultValue := 0.2;
 
   action hasRandomSeed() returns boolean {
-    return hasParam(randomSeedParamName());
+    return hasParam(randomSeedParamName);
   }
 
   action getRandomSeed() returns integer {
-    return getIntegerOrElse(randomSeedParamName(), randomSeedDefaultValue());
+    return getIntegerOrElse(randomSeedParamName, randomSeedDefaultValue);
   }
 
   action shouldRandomize() returns boolean {
-    return not hasParam(doNotRandomizeOrderParamName());
+    return not hasParam(doNotRandomizeOrderParamName);
   }
 
   action setRandomSeed(integer seed) {
-    setIntegerParam(randomSeedParamName(), seed);
+    setIntegerParam(randomSeedParamName, seed);
   }
 
   action getTimeout() returns float {
-    return getFloatOrElse(timeoutParamName(), timeoutDefaultValue());
+    return getFloatOrElse(timeoutParamName, timeoutDefaultValue);
   }
 
   action hasParam(string param) returns boolean {
