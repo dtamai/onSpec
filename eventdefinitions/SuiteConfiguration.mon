@@ -3,6 +3,9 @@ package com.dtamai.onspec;
 event SuiteConfiguration {
   dictionary<string, string> config;
 
+  constant string kvPairSep := ", ";
+  constant string kvSep := ":";
+
   action randomSeedParamName() returns string { return "randomSeed"; }
   action randomSeedDefaultValue() returns integer { return 1; }
 
@@ -65,6 +68,25 @@ event SuiteConfiguration {
     }
 
     return value;
+  }
+
+  action fromString(string configString) returns SuiteConfiguration {
+    dictionary<string, string> configuration := {};
+    sequence<string> kvPairs := kvPairSep.tokenize(configString);
+
+    string pair, k, v;
+    sequence<string> kv;
+    for pair in kvPairs {
+      kv := kvSep.tokenize(pair);
+      if kv.size() = 2 then {
+        k := kv[0];
+        v := kv[1];
+        configuration[k] := v;
+      } else {
+        log "Expected a parseable configuration string in " + kv.toString() at ERROR;
+      }
+    }
+    return SuiteConfiguration(configuration);
   }
 }
 

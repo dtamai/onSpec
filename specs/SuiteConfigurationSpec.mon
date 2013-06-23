@@ -1,0 +1,68 @@
+package com.dtamai.onspec;
+
+using com.dtamai.onspec.expectation.IntegerValue;
+using com.dtamai.onspec.expectation.StringValue;
+
+monitor SuiteConfigurationSpec {
+  Suite _;
+
+  action onload() {
+    _.init(run);
+  }
+
+  action run() {
+    string kvPairSep := SuiteConfiguration.kvPairSep;
+    string kvSep := SuiteConfiguration.kvSep;
+
+    on Spec(_.describe("SuiteConfiguration")) {
+      on Spec(_.describe("#parse")) {
+
+        on Spec(_.it("parses simple string configurations")) {
+          string k := "timeout";
+          string v := "0.2";
+          string conf := k + kvSep + v;
+          dictionary<string, string> expected := {k:v};
+
+          dictionary<string, string> actual := (new SuiteConfiguration).fromString(conf).config;
+
+          IntegerValue(actual.size()).mustBe(1);
+          StringValue(actual.keys()[0]).mustBe(k);
+          StringValue(actual.values()[0]).mustBe(v);
+          _.done();
+        }
+
+        on Spec(_.it("parses config string with multiple pairs")) {
+          string conf := "k1:v1, k2:v2";
+          dictionary<string, string> expected := {"k1":"v1", "k2":"v2"};
+
+          dictionary<string, string> actual := (new SuiteConfiguration).fromString(conf).config;
+
+          IntegerValue(actual.size()).mustBe(expected.size());
+          StringValue(actual["k1"]).mustBe(expected["k1"]);
+          StringValue(actual["k2"]).mustBe(expected["k2"]);
+          _.done();
+        }
+
+        on Spec(_.it("ignores key-value pairs with invalid separator")) {
+          string invalid := "k;v";
+          dictionary<string, string> expected := {};
+
+          dictionary<string, string> actual := (new SuiteConfiguration).fromString(invalid).config;
+
+          IntegerValue(actual.size()).mustBe(expected.size());
+          _.done();
+        }
+
+        on Spec(_.it("ignores multiple pairs with invalid pair separator")) {
+          string invalid := "k1:v1;k2:v2";
+          dictionary<string, string> expected := {};
+
+          dictionary<string, string> actual := (new SuiteConfiguration).fromString(invalid).config;
+
+          IntegerValue(actual.size()).mustBe(expected.size());
+          _.done();
+        }
+      }
+    }
+  }
+}
