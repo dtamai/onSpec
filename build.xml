@@ -1,0 +1,17 @@
+<project name="onSpec">
+
+  <property name="build.dir" location="./build"/>
+
+  <property environment="env"/>
+  <import file="${env.APAMA_HOME}/etc/apama-macros.xml"/>
+
+  <target name="package">
+    <engine-package output="${build.dir}/${ant.project.name}.cdp" manifest="manifest.txt"/>
+  </target>
+
+  <target name="clean">
+    <delete>
+      <fileset dir="${build.dir}" includes="**/*.cdp"/>
+    </delete>
+  </target>
+</project>
