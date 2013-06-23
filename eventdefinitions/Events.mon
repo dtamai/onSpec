@@ -76,3 +76,9 @@ event _Skip {
   wildcard sequence<string> context;
 }
 
+/** @private */
+event _Error {
+  wildcard string reason;
+  wildcard sequence<string> context;
+}
+

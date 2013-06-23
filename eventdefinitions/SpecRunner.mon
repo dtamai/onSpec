@@ -136,7 +136,8 @@ event SpecRunner {
 
       spawn runExample(exId);
       listener timeout := on wait (examples[exId].config.getTimeout()*2.0) {
-        SpecReporter().fail("example died unexpectedly");
+        route _Error("example died unexpectedly", getCurrentContextDescriptionList());
+        route _SpecDone(exId);
       }
       on _SpecDone(exId) {
         timeout.quit();

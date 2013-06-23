@@ -14,6 +14,8 @@ monitor SuiteRunner {
   /** @private */
   sequence<string> skips := [];
   /** @private */
+  sequence<string> errors := [];
+  /** @private */
   SuiteConfiguration config;
 
   import "TimeFormatPlugin" as time;
@@ -62,6 +64,12 @@ monitor SuiteRunner {
       skips.append("'" + expandContextString(s.context) + "' skipped");
     }
 
+    _Error e;
+    on all _Error():e {
+      results.append("E");
+      errors.append("'" + expandContextString(e.context) + "' ERROR: " + e.reason);
+    }
+
   }
 
   /** @private */
@@ -99,8 +107,9 @@ monitor SuiteRunner {
     print "".join(results);
     print results.size().toString() + " example(s) in " +
       (time.getMicroTime() - beginTime).formatFixed(6) + "s | " +
+      skips.size().toString() + " skip(s) | " +
       failures.size().toString() + " failure(s) | " +
-      skips.size().toString() + " skip(s)";
+      errors.size().toString() + " error(s)";
     print "";
     if skips.size() > 0 then {
       print "Skips: ";
@@ -110,6 +119,11 @@ monitor SuiteRunner {
     if failures.size() > 0 then {
       print "Failures: ";
       print "\n".join(failures);
+      print "";
+    }
+    if errors.size() > 0 then {
+      print "Errors: ";
+      print "\n".join(errors);
       print "";
     }
     die;
