@@ -63,6 +63,36 @@ monitor SuiteConfigurationSpec {
           _.done();
         }
       }
+
+      on Spec(_.describe("#merge")) {
+
+        on Spec(_.it("merges two configurations")) {
+          SuiteConfiguration conf1, conf2 := new SuiteConfiguration;
+          conf1 := SuiteConfiguration.fromString(conf2, "k1:v1");
+          conf2 := SuiteConfiguration.fromString(conf2, "k2:v2");
+          dictionary<string, string> expected := {"k1":"v1", "k2":"v2"};
+
+          dictionary<string, string> actual := conf1.merge(conf2).config;
+
+          IntegerValue(actual.size()).mustBe(expected.size());
+          StringValue(actual["k1"]).mustBe(expected["k1"]);
+          StringValue(actual["k2"]).mustBe(expected["k2"]);
+          _.done();
+        }
+
+        on Spec(_.it("has an incoming param overwrite the base config")) {
+          SuiteConfiguration conf1, conf2 := new SuiteConfiguration;
+          conf1 := SuiteConfiguration.fromString(conf2, "k1:v1");
+          conf2 := SuiteConfiguration.fromString(conf2, "k1:v2");
+          dictionary<string, string> expected := {"k1":"v2"};
+
+          dictionary<string, string> actual := conf1.merge(conf2).config;
+
+          IntegerValue(actual.size()).mustBe(expected.size());
+          StringValue(actual["k1"]).mustBe(expected["k1"]);
+          _.done();
+        }
+      }
     }
   }
 }

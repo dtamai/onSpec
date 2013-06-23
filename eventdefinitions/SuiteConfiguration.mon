@@ -88,5 +88,17 @@ event SuiteConfiguration {
     }
     return SuiteConfiguration(configuration);
   }
+
+  action merge(SuiteConfiguration other) returns SuiteConfiguration {
+    dictionary<string, string> newConfig := config.clone();
+    sequence<string> otherKeys := other.config.keys();
+    string otherK;
+
+    for otherK in otherKeys {
+      newConfig[otherK] := other.config[otherK];
+    }
+
+    return SuiteConfiguration(newConfig);
+  }
 }
 
