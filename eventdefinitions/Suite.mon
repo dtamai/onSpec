@@ -1,5 +1,9 @@
 package org.onspec;
 
+using org.onspec.internal.SpecDiscover;
+using org.onspec.internal.SpecPresent;
+using org.onspec.internal.SpecBegin;
+
 /**
  * Facade event to make easy write specs.
  * @listens NewSuite Runs a new spec suite
@@ -10,7 +14,7 @@ event Suite {
   wildcard integer _id;
 
   /** @private */
-  SpecRunner _runner;
+  org.onspec.internal.SpecRunner _runner;
 
   /** @private */
   SpecReporter _reporter;
@@ -59,7 +63,7 @@ event Suite {
 
     terminate();
 
-    waitNewSuite := on all NewSuite() -> _SpecDiscover() {
+    waitNewSuite := on all NewSuite() -> SpecDiscover() {
       spawn _handleNewSuite(runnable);
     }
   }
@@ -118,9 +122,9 @@ event Suite {
   /** @private */
   action _handleNewSuite(action<> runnable) {
     integer id := getId();
-    route _SpecPresent(id);
-    _SpecBegin begin;
-    on _SpecBegin(id=id):begin {
+    route SpecPresent(id);
+    SpecBegin begin;
+    on SpecBegin(id=id):begin {
       _runner.run(runnable, id, begin.config);
     }
   }

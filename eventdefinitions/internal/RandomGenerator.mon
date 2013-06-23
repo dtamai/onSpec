@@ -1,4 +1,4 @@
-package org.onspec;
+package org.onspec.internal;
 
 /** @private */
 event RandomGenerator {

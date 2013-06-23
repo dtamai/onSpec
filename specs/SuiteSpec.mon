@@ -31,11 +31,11 @@ monitor SuiteSpec {
   }
 
   action testAnswerSpecDiscover() {
-    on _SpecPresent() { enqueue SuiteSpec_Passed(); }
+    on org.onspec.internal.SpecPresent() { enqueue SuiteSpec_Passed(); }
 
     Suite suite := dummySuite();
     route NewSuite();
-    route _SpecDiscover();
+    route org.onspec.internal.SpecDiscover();
   }
 
   action dummySuite() returns Suite {

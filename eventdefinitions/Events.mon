@@ -14,71 +14,9 @@ event Spec {
   integer id;
 }
 
-/** @private */
-event _SpecBegin {
-  integer id;
-  SuiteConfiguration config;
-}
-
-/** @private */
-event _SpecEnd {
-  integer id;
-}
-
-/** @private */
-event _SpecDiscover {
-}
-
-/** @private */
-event _SpecPresent {
-  wildcard integer id;
-}
-
 /**
 * Runs a new spec suite.
 */
 event NewSuite {
-}
-
-/** @private */
-event _SpecDone {
-  integer id;
-}
-
-/** @private */
-event _ContextDescription {
-  wildcard integer id;
-  wildcard string text;
-  wildcard sequence<integer> idSequenceToOpen;
-  wildcard SuiteConfiguration config;
-}
-
-/** @private */
-event _SpecDescription {
-  wildcard integer id;
-  wildcard string text;
-  wildcard sequence<integer> parentContextsId;
-  wildcard SuiteConfiguration config;
-}
-
-/** @private */
-event _Failure {
-  wildcard string reason;
-  wildcard sequence<string> context;
-}
-
-/** @private */
-event _Success {
-}
-
-/** @private */
-event _Skip {
-  wildcard sequence<string> context;
-}
-
-/** @private */
-event _Error {
-  wildcard string reason;
-  wildcard sequence<string> context;
 }
 

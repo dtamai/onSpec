@@ -1,0 +1,64 @@
+package org.onspec.internal;
+
+/** @private */
+event SpecBegin {
+  integer id;
+  org.onspec.SuiteConfiguration config;
+}
+
+/** @private */
+event SpecEnd {
+  integer id;
+}
+
+/** @private */
+event SpecDiscover {
+}
+
+/** @private */
+event SpecPresent {
+  wildcard integer id;
+}
+
+/** @private */
+event SpecDone {
+  integer id;
+}
+
+/** @private */
+event ContextDescription {
+  wildcard integer id;
+  wildcard string text;
+  wildcard sequence<integer> idSequenceToOpen;
+  wildcard org.onspec.SuiteConfiguration config;
+}
+
+/** @private */
+event SpecDescription {
+  wildcard integer id;
+  wildcard string text;
+  wildcard sequence<integer> parentContextsId;
+  wildcard org.onspec.SuiteConfiguration config;
+}
+
+/** @private */
+event Failure {
+  wildcard string reason;
+  wildcard sequence<string> context;
+}
+
+/** @private */
+event Success {
+}
+
+/** @private */
+event Skip {
+  wildcard sequence<string> context;
+}
+
+/** @private */
+event Error {
+  wildcard string reason;
+  wildcard sequence<string> context;
+}
+

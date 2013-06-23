@@ -1,4 +1,7 @@
-package org.onspec;
+package org.onspec.internal;
+
+using org.onspec.Spec;
+using org.onspec.SuiteConfiguration;
 
 /** @private */
 event SpecRunner {
@@ -51,7 +54,7 @@ event SpecRunner {
   }
 
   action storeContext(string text, integer id) {
-    contexts[id] := _ContextDescription(id, text, surroundingContext.idSequenceToOpen.clone(), buildLocalConfig());
+    contexts[id] := ContextDescription(id, text, surroundingContext.idSequenceToOpen.clone(), buildLocalConfig());
     contextsMap[text] := id;
     contextsOrder.append(id);
   }
@@ -59,7 +62,7 @@ event SpecRunner {
   action storeExample(string text, integer id) {
     examplesMap[text] := id;
     examplesOrder.append(id);
-    examples[id] := _SpecDescription(id, text, surroundingContext.idSequenceToOpen.clone(), buildLocalConfig());
+    examples[id] := SpecDescription(id, text, surroundingContext.idSequenceToOpen.clone(), buildLocalConfig());
   }
 
   action getId() returns integer{
@@ -136,23 +139,23 @@ event SpecRunner {
 
       spawn runExample(exId);
       listener timeout := on wait (examples[exId].config.getTimeout()*2.0) {
-        route _Error("example died unexpectedly", getCurrentContextDescriptionList());
-        route _SpecDone(exId);
+        route org.onspec.internal.Error("example died unexpectedly", getCurrentContextDescriptionList());
+        route SpecDone(exId);
       }
-      on _SpecDone(exId) {
+      on SpecDone(exId) {
         timeout.quit();
         pendingExamplesId.remove(0);
         runFirstExample();
       }
     } else {
-      route _SpecEnd(self.specId);
+      route SpecEnd(self.specId);
       die;
     }
   }
 
   action runExample(integer exampleId) {
     rewindSpecMonitor();
-    _SpecDescription example := examples[exampleId];
+    SpecDescription example := examples[exampleId];
 
     integer ctxId;
     for ctxId in examples[exampleId].parentContextsId {
@@ -160,10 +163,10 @@ event SpecRunner {
     }
 
     route Spec(exampleId);
-    on wait (example.config.getTimeout()) and not _SpecDone(exampleId) {
-      SpecReporter().fail("timeout");
+    on wait (example.config.getTimeout()) and not SpecDone(exampleId) {
+      org.onspec.SpecReporter().fail("timeout");
     }
-    on _SpecDone(exampleId) {
+    on SpecDone(exampleId) {
       die;
     }
   }
@@ -178,8 +181,8 @@ event SpecRunner {
     return ctxList;
   }
 
-  action createRootContext(integer id) returns _ContextDescription {
-    _ContextDescription c := new _ContextDescription;
+  action createRootContext(integer id) returns ContextDescription {
+    ContextDescription c := new ContextDescription;
     c.id := id;
     c.idSequenceToOpen := [];
     return c;
@@ -191,22 +194,22 @@ event SpecRunner {
   }
 
   action listenProgressionEvents() {
-    Skip s;
-    on all Skip():s {
-      route _Skip(getCurrentContextDescriptionList());
+    org.onspec.Skip s;
+    on all org.onspec.Skip():s {
+      route Skip(getCurrentContextDescriptionList());
     }
 
-    on all Success() {
-      route _Success();
+    on all org.onspec.Success() {
+      route Success();
     }
 
-    Failure f;
-    on all Failure():f {
-      route _Failure(f.reason, getCurrentContextDescriptionList());
+    org.onspec.Failure f;
+    on all org.onspec.Failure():f {
+      route Failure(f.reason, getCurrentContextDescriptionList());
     }
 
-    on all Done() {
-      route _SpecDone(cursor);
+    on all org.onspec.Done() {
+      route SpecDone(cursor);
     }
   }
 
@@ -239,7 +242,7 @@ event SpecRunner {
 
   // Used while discovering examples, holds the _ContextDescription of the
   // most internal context that is outside the current context.
-  _ContextDescription surroundingContext;
+  ContextDescription surroundingContext;
 
   // Used while discovering examples, holds the ids of contexts still closed
   sequence<integer> pendingContextsId;
@@ -248,11 +251,11 @@ event SpecRunner {
 
   // Holds all contexts, its is populated in the first run and must be
   // read-only after discovery is done
-  dictionary<integer /*id*/, _ContextDescription> contexts;
+  dictionary<integer /*id*/, ContextDescription> contexts;
 
   // Holds all examples, it is populated in the first run and must be
   // read-only after discovery is done
-  dictionary<integer /*id*/, _SpecDescription> examples;
+  dictionary<integer /*id*/, SpecDescription> examples;
 
   // Global suite configuration
   SuiteConfiguration config;

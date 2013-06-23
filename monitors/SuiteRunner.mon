@@ -1,4 +1,7 @@
-﻿package org.onspec;
+﻿package org.onspec.internal;
+
+using org.onspec.NewSuite;
+using org.onspec.SuiteConfiguration;
 
 /**
  * Monitor that manages running specs.
@@ -36,36 +39,36 @@ monitor SuiteRunner {
 
   /** @private */
   action handleNewSuite() {
-    route _SpecDiscover();
+    route SpecDiscover();
 
-    _SpecPresent spec;
-    listener disc := on all _SpecPresent():spec {
+    SpecPresent spec;
+    listener disc := on all SpecPresent():spec {
       specs.append(spec.id);
     }
 
-    on completed _SpecDiscover() {
+    on completed SpecDiscover() {
       disc.quit();
       runSpec();
     }
 
-    _Failure f;
-    on all _Failure():f {
+    Failure f;
+    on all Failure():f {
       results.append("F");
       failures.append("'" + expandContextString(f.context) + "' failed: " + f.reason);
     }
 
-    on all _Success() {
+    on all Success() {
       results.append(".");
     }
 
-    _Skip s;
-    on all _Skip():s {
+    Skip s;
+    on all Skip():s {
       results.append("S");
       skips.append("'" + expandContextString(s.context) + "' skipped");
     }
 
-    _Error e;
-    on all _Error():e {
+    Error e;
+    on all Error():e {
       results.append("E");
       errors.append("'" + expandContextString(e.context) + "' ERROR: " + e.reason);
     }
@@ -89,8 +92,8 @@ monitor SuiteRunner {
     if specs.size() <= 0 then { endSuite(); }
 
     integer currId := specs[0];
-    route _SpecBegin(currId, config);
-    on _SpecEnd(currId) {
+    route SpecBegin(currId, config);
+    on SpecEnd(currId) {
       specs.remove(0);
       runSpec();
     }
