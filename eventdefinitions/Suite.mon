@@ -39,6 +39,16 @@ event Suite {
   }
 
   /**
+   * Customize the configuration for the next context/example declared.
+   * If before a context, the configuration applies to every example inside
+   * that context.
+   * If before an example, the configuration applies only to that example.
+   */
+  action config(string configString) {
+    _runner.addConfig(configString);
+  }
+
+  /**
    * Action to initialize the suite. It needs to be called before a NewSuite.
    * @param runnable The action that contains the contexts and example (Spec listeners)
    * @listens NewSuite Runs a new spec suite

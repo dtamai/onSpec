@@ -50,6 +50,7 @@ event _ContextDescription {
   wildcard integer id;
   wildcard string text;
   wildcard sequence<integer> idSequenceToOpen;
+  wildcard SuiteConfiguration config;
 }
 
 /** @private */
@@ -57,6 +58,7 @@ event _SpecDescription {
   wildcard integer id;
   wildcard string text;
   wildcard sequence<integer> parentContextsId;
+  wildcard SuiteConfiguration config;
 }
 
 /** @private */

@@ -5,6 +5,7 @@ event SpecRunner {
 
   action<string> returns integer addContext;
   action<string> returns integer addSpec;
+  action<string> addConfig;
 
   action run(action<> runnable, integer specId, SuiteConfiguration config) {
     self.specId := specId;
@@ -19,6 +20,7 @@ event SpecRunner {
   action discoverContext(string text) returns integer {
     integer id := getId();
     storeContext(text, id);
+    clearConfig();
 
     pendingContextsId.append(id);
 
@@ -28,8 +30,13 @@ event SpecRunner {
   action discoverExample(string text) returns integer {
     integer id := getId();
     storeExample(text, id);
+    clearConfig();
 
     return id;
+  }
+
+  action configure(string configString) {
+    nextConfig := nextConfig.fromString(configString);
   }
 
   action repeatContextsId(string text) returns integer {
@@ -40,8 +47,11 @@ event SpecRunner {
     return examplesMap[text];
   }
 
+  action noopConfig(string configString) {
+  }
+
   action storeContext(string text, integer id) {
-    contexts[id] := _ContextDescription(id, text, surroundingContext.idSequenceToOpen.clone());
+    contexts[id] := _ContextDescription(id, text, surroundingContext.idSequenceToOpen.clone(), buildLocalConfig());
     contextsMap[text] := id;
     contextsOrder.append(id);
   }
@@ -49,7 +59,7 @@ event SpecRunner {
   action storeExample(string text, integer id) {
     examplesMap[text] := id;
     examplesOrder.append(id);
-    examples[id] := _SpecDescription(id, text, surroundingContext.idSequenceToOpen.clone());
+    examples[id] := _SpecDescription(id, text, surroundingContext.idSequenceToOpen.clone(), buildLocalConfig());
   }
 
   action getId() returns integer{
@@ -66,6 +76,7 @@ event SpecRunner {
   action prepareDiscovery() {
     addContext := discoverContext;
     addSpec := discoverExample;
+    addConfig := configure;
   }
 
   action openContextsForDiscovery(action<> nextStep) {
@@ -85,9 +96,18 @@ event SpecRunner {
     }
   }
 
+  action buildLocalConfig() returns SuiteConfiguration {
+    return config.merge(surroundingContext.config).merge(nextConfig);
+  }
+
+  action clearConfig() {
+    nextConfig := new SuiteConfiguration;
+  }
+
   action disableDiscovery() {
     addContext := repeatContextsId;
     addSpec := repeatExamplesId;
+    addConfig := noopConfig;
   }
 
   action rewindSpecMonitor() {
@@ -135,7 +155,7 @@ event SpecRunner {
     }
 
     route Spec(exampleId);
-    on wait (config.getTimeout()) {
+    on wait (example.config.getTimeout()) {
       SpecReporter().fail("timeout");
     }
     on _SpecDone(exampleId) {
@@ -231,6 +251,9 @@ event SpecRunner {
 
   // Global suite configuration
   SuiteConfiguration config;
+
+  // Cache configuration
+  SuiteConfiguration nextConfig;
 
   chunk __deadWeight;
 }

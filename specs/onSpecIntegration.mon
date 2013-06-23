@@ -55,12 +55,17 @@ monitor onSpecSample {
       }
     }
 
+    $.config("timeout:1.0");
     on Spec($.describe("The second example")) {
       on Spec($.describe("some buried knowledge")) {
         on Spec($.it("extends the understanding")) {
           route SampleResponse("it did");
           $.fail("Eventually something breaks");
         }
+      }
+
+      on Spec($.it("is like an older brother for the example above")) {
+        $.pass();
       }
     }
 
@@ -87,8 +92,16 @@ monitor onSpecSample2 {
         _.pass();
       }
 
+      _.config("timeout:0.5, tags:slow");
       on Spec(_.it("has that one that times out")) {
         route SampleResponse("did I forget something?");
+      }
+
+      on Spec(_.it("survives runtime error")) {
+        _.fail("Not yet surviving if there is no message to terminate the spec before ");
+        sequence<integer> empty := [];
+        integer error := empty[1000];
+        _.done();
       }
     }
   }
