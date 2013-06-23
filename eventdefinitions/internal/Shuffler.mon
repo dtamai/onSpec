@@ -7,6 +7,10 @@ event Shuffler {
   // Using Durstenfeld's version of Fisher-Yattes shuffle algorithm
   // http://en.wikipedia.org/wiki/Fisher-Yates_shuffle#The_modern_algorithm
   action shuffle(sequence<integer> source) returns sequence<integer> {
+    if source.size() = 0 then {
+      return source;
+    }
+
     integer n := source.size();
     integer j;
     integer i := 1;
