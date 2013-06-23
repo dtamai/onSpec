@@ -107,10 +107,11 @@ event Suite {
 
   /** @private */
   action _handleNewSuite(action<> runnable) {
-    route _SpecPresent(self._id);
+    integer id := getId();
+    route _SpecPresent(id);
     _SpecBegin begin;
-    on _SpecBegin(id=_id):begin {
-      _runner.run(runnable, self._id, begin.config);
+    on _SpecBegin(id=id):begin {
+      _runner.run(runnable, id, begin.config);
     }
   }
 }
