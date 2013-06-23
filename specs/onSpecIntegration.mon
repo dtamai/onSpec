@@ -98,7 +98,6 @@ monitor onSpecSample2 {
       }
 
       on Spec(_.it("survives runtime error")) {
-        _.fail("Not yet surviving if there is no message to terminate the spec before ");
         sequence<integer> empty := [];
         integer error := empty[1000];
         _.done();

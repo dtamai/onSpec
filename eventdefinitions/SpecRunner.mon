@@ -135,7 +135,11 @@ event SpecRunner {
       cursor := exId;
 
       spawn runExample(exId);
+      listener timeout := on wait (examples[exId].config.getTimeout()*2.0) {
+        SpecReporter().fail("example died unexpectedly");
+      }
       on _SpecDone(exId) {
+        timeout.quit();
         pendingExamplesId.remove(0);
         runFirstExample();
       }
@@ -155,7 +159,7 @@ event SpecRunner {
     }
 
     route Spec(exampleId);
-    on wait (example.config.getTimeout()) {
+    on wait (example.config.getTimeout()) and not _SpecDone(exampleId) {
       SpecReporter().fail("timeout");
     }
     on _SpecDone(exampleId) {
