@@ -141,7 +141,7 @@ event SpecRunner {
 
       spawn runExample(exId);
       listener timeout := on wait (examples[exId].config.getTimeout()*2.0) {
-        route org.onspec.internal.Error(exId, "example died unexpectedly", getCurrentContextDescriptionList());
+        route org.onspec.internal.Error(exId, "example died unexpectedly");
         route SpecDone(exId);
       }
       on SpecDone(exId) {
@@ -173,16 +173,6 @@ event SpecRunner {
     }
   }
 
-  action getCurrentContextDescriptionList() returns sequence<string> {
-    sequence<string> ctxList := [];
-    integer ctxId;
-    for ctxId in examples[cursor].parentContextsId {
-      ctxList.append(contexts[ctxId].text);
-    }
-    ctxList.append(examples[cursor].text);
-    return ctxList;
-  }
-
   action createRootContext(integer id) returns ContextDescription {
     ContextDescription c := new ContextDescription;
     c.id := id;
@@ -198,7 +188,7 @@ event SpecRunner {
   action listenProgressionEvents() {
     org.onspec.Skip s;
     on all org.onspec.Skip():s {
-      route Skip(cursor, getCurrentContextDescriptionList());
+      route Skip(cursor);
     }
 
     on all org.onspec.Success() {
@@ -207,7 +197,7 @@ event SpecRunner {
 
     org.onspec.Failure f;
     on all org.onspec.Failure():f {
-      route Failure(cursor, f.reason, getCurrentContextDescriptionList());
+      route Failure(cursor, f.reason);
     }
 
     on all org.onspec.Done() {

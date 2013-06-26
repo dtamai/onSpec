@@ -68,7 +68,7 @@ monitor SuiteRunner {
     Failure f;
     on all Failure():f {
       results.append("F");
-      failures.append("'" + expandContextString(f.context) + "' failed: " + f.reason);
+      failures.append("'" + expandContextString(f.id) + "' failed: " + f.reason);
     }
 
     on all Success() {
@@ -78,13 +78,13 @@ monitor SuiteRunner {
     Skip s;
     on all Skip():s {
       results.append("S");
-      skips.append("'" + expandContextString(s.context) + "' skipped");
+      skips.append("'" + expandContextString(s.id) + "' skipped");
     }
 
     Error e;
     on all Error():e {
       results.append("E");
-      errors.append("'" + expandContextString(e.context) + "' ERROR: " + e.reason);
+      errors.append("'" + expandContextString(e.id) + "' ERROR: " + e.reason);
     }
 
   }
@@ -114,8 +114,19 @@ monitor SuiteRunner {
   }
 
   /** @private */
-  action expandContextString(sequence<string> context) returns string {
-    return " ".join(context);
+  action expandContextString(integer exampleId) returns string {
+    return " ".join(getContextDescriptionList(exampleId));
+  }
+
+  /** @private */
+  action getContextDescriptionList(integer exampleId) returns sequence<string> {
+    sequence<string> ctxList := [];
+    integer ctxId;
+    for ctxId in examples[exampleId].parentContextsId {
+      ctxList.append(contexts[ctxId].text);
+    }
+    ctxList.append(examples[exampleId].text);
+    return ctxList;
   }
 
   /** @private */
