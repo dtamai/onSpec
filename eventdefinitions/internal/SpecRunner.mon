@@ -57,6 +57,7 @@ event SpecRunner {
     contexts[id] := ContextDescription(id, text, surroundingContext.idSequenceToOpen.clone(), buildLocalConfig());
     contextsMap[text] := id;
     contextsOrder.append(id);
+    route contexts[id];
   }
 
   action storeExample(string text, integer id) {

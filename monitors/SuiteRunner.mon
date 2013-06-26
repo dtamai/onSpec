@@ -11,6 +11,8 @@ monitor SuiteRunner {
   /** @private */
   sequence<integer> specs := [];
   /** @private */
+  dictionary<integer /*id*/, ContextDescription> contexts := {};
+  /** @private */
   dictionary<integer /*id*/, ExampleDescription> examples := {};
   /** @private */
   sequence<string> results := [];
@@ -46,6 +48,11 @@ monitor SuiteRunner {
     SpecPresent spec;
     listener disc := on all SpecPresent():spec {
       specs.append(spec.id);
+    }
+
+    ContextDescription ctx;
+    on all ContextDescription():ctx {
+      contexts[ctx.id] := ctx;
     }
 
     ExampleDescription ex;
