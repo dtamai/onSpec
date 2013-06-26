@@ -11,6 +11,8 @@ monitor SuiteRunner {
   /** @private */
   sequence<integer> specs := [];
   /** @private */
+  dictionary<integer /*id*/, ExampleDescription> examples := {};
+  /** @private */
   sequence<string> results := [];
   /** @private */
   sequence<string> failures := [];
@@ -33,7 +35,7 @@ monitor SuiteRunner {
 
     on all NewSuite() {
       beginTime := time.getMicroTime();
-      spawn handleNewSuite;
+      spawn handleNewSuite();
     }
   }
 
@@ -44,6 +46,11 @@ monitor SuiteRunner {
     SpecPresent spec;
     listener disc := on all SpecPresent():spec {
       specs.append(spec.id);
+    }
+
+    ExampleDescription ex;
+    on all ExampleDescription():ex {
+      examples[ex.id] := ex;
     }
 
     on completed SpecDiscover() {

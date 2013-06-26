@@ -62,7 +62,8 @@ event SpecRunner {
   action storeExample(string text, integer id) {
     examplesMap[text] := id;
     examplesOrder.append(id);
-      examples[id] := ExampleDescription(id, text, surroundingContext.idSequenceToOpen.clone(), buildLocalConfig());
+    examples[id] := ExampleDescription(id, text, surroundingContext.idSequenceToOpen.clone(), buildLocalConfig());
+    route examples[id];
   }
 
   action getId() returns integer{
