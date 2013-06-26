@@ -56,7 +56,6 @@ event SpecRunner {
   action storeContext(string text, integer id) {
     contexts[id] := ContextDescription(id, text, surroundingContext.idSequenceToOpen.clone(), buildLocalConfig());
     contextsMap[text] := id;
-    contextsOrder.append(id);
     route contexts[id];
   }
 
@@ -117,7 +116,7 @@ event SpecRunner {
 
   action rewindSpecMonitor() {
     specsMonitorEntryPoint();
-    cursor := contextsOrder[0];
+    cursor := 0;
   }
 
   action doSpawn() {
@@ -222,7 +221,6 @@ event SpecRunner {
   action<> specsMonitorEntryPoint;
 
   dictionary<string /*text*/, integer /*id*/> contextsMap;
-  sequence<integer /*id*/> contextsOrder;
   dictionary<string /*text*/, integer /*id*/> examplesMap;
   sequence<integer /*id*/> examplesOrder;
 
