@@ -62,7 +62,7 @@ event SpecRunner {
   action storeExample(string text, integer id) {
     examplesMap[text] := id;
     examplesOrder.append(id);
-    examples[id] := SpecDescription(id, text, surroundingContext.idSequenceToOpen.clone(), buildLocalConfig());
+      examples[id] := ExampleDescription(id, text, surroundingContext.idSequenceToOpen.clone(), buildLocalConfig());
   }
 
   action getId() returns integer{
@@ -155,7 +155,7 @@ event SpecRunner {
 
   action runExample(integer exampleId) {
     rewindSpecMonitor();
-    SpecDescription example := examples[exampleId];
+    ExampleDescription example := examples[exampleId];
 
     integer ctxId;
     for ctxId in examples[exampleId].parentContextsId {
@@ -255,7 +255,7 @@ event SpecRunner {
 
   // Holds all examples, it is populated in the first run and must be
   // read-only after discovery is done
-  dictionary<integer /*id*/, SpecDescription> examples;
+  dictionary<integer /*id*/, ExampleDescription> examples;
 
   // Global suite configuration
   SuiteConfiguration config;

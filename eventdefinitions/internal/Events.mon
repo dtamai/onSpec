@@ -34,7 +34,7 @@ event ContextDescription {
 }
 
 /** @private */
-event SpecDescription {
+event ExampleDescription {
   wildcard integer id;
   wildcard string text;
   wildcard sequence<integer> parentContextsId;
