@@ -43,21 +43,25 @@ event ExampleDescription {
 
 /** @private */
 event Failure {
+  wildcard integer id;
   wildcard string reason;
   wildcard sequence<string> context;
 }
 
 /** @private */
 event Success {
+  wildcard integer id;
 }
 
 /** @private */
 event Skip {
+  wildcard integer id;
   wildcard sequence<string> context;
 }
 
 /** @private */
 event Error {
+  wildcard integer id;
   wildcard string reason;
   wildcard sequence<string> context;
 }

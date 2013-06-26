@@ -141,7 +141,7 @@ event SpecRunner {
 
       spawn runExample(exId);
       listener timeout := on wait (examples[exId].config.getTimeout()*2.0) {
-        route org.onspec.internal.Error("example died unexpectedly", getCurrentContextDescriptionList());
+        route org.onspec.internal.Error(exId, "example died unexpectedly", getCurrentContextDescriptionList());
         route SpecDone(exId);
       }
       on SpecDone(exId) {
@@ -198,16 +198,16 @@ event SpecRunner {
   action listenProgressionEvents() {
     org.onspec.Skip s;
     on all org.onspec.Skip():s {
-      route Skip(getCurrentContextDescriptionList());
+      route Skip(cursor, getCurrentContextDescriptionList());
     }
 
     on all org.onspec.Success() {
-      route Success();
+      route Success(cursor);
     }
 
     org.onspec.Failure f;
     on all org.onspec.Failure():f {
-      route Failure(f.reason, getCurrentContextDescriptionList());
+      route Failure(cursor, f.reason, getCurrentContextDescriptionList());
     }
 
     on all org.onspec.Done() {
