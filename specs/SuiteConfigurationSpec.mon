@@ -67,9 +67,8 @@ monitor SuiteConfigurationSpec {
       on Spec(_.describe("#merge")) {
 
         on Spec(_.it("merges two configurations")) {
-          SuiteConfiguration conf1, conf2 := new SuiteConfiguration;
-          conf1 := SuiteConfiguration.fromString(conf2, "k1:v1");
-          conf2 := SuiteConfiguration.fromString(conf2, "k2:v2");
+          SuiteConfiguration conf1 := (new SuiteConfiguration).fromString("k1:v1");
+          SuiteConfiguration conf2 := (new SuiteConfiguration).fromString("k2:v2");
           dictionary<string, string> expected := {"k1":"v1", "k2":"v2"};
 
           dictionary<string, string> actual := conf1.merge(conf2).config;
