@@ -62,7 +62,17 @@ monitor SuiteRunner {
 
     on completed SpecDiscover() {
       disc.quit();
-      runSpec();
+      route SpecPrepare(config);
+
+      SpecReady r;
+      sequence<integer> knownSpecs := specs.clone();
+      listener ready := on all SpecReady():r {
+        knownSpecs.remove(knownSpecs.indexOf(r.id));
+        if knownSpecs.size() = 0 then {
+          ready.quit();
+          runExamples();
+        }
+      }
     }
 
     Failure f;
@@ -100,6 +110,44 @@ monitor SuiteRunner {
       print "!! [WARN] Runing specs in order !!";
     }
   }
+
+  // Used while running examples, is a modifiable copy of the examples list
+  sequence<integer> pendingExamplesId;
+  action runExamples() {
+    pendingExamplesId := defineExamplesOrder(examples.keys());
+    runFirstExample();
+  }
+
+  integer cursor;
+  action runFirstExample() {
+    if pendingExamplesId.size() > 0 then {
+      integer exId := pendingExamplesId[0];
+      cursor := exId;
+
+       route RunExample(exId);
+       on wait ((examples[exId].config.getTimeout()*2.0) + 0.5) and not SpecDone(exId) {
+         route org.onspec.internal.Error(exId, "example died unexpectedly");
+         route SpecDone(exId);
+       }
+       on SpecDone(exId) {
+         pendingExamplesId.remove(0);
+         runFirstExample();
+       }
+    } else {
+      endSuite();
+    }
+  }
+
+  action defineExamplesOrder(sequence<integer> list) returns sequence<integer> {
+    if config.shouldRandomize() then {
+      RandomGenerator generator := new RandomGenerator;
+      generator.init(config.getRandomSeed());
+      return Shuffler(generator).shuffle(list);
+    } else {
+      return list;
+    }
+  }
+
 
   /** @private */
   action runSpec() {
@@ -155,6 +203,36 @@ monitor SuiteRunner {
       print "";
     }
     die;
+  }
+}
+
+monitor ExampleResultListener {
+  action onload() {
+    RunExample ex;
+    on all RunExample():ex {
+      spawn listenResult(ex.id);
+    }
+  }
+
+  action listenResult(integer id) {
+    org.onspec.Skip s;
+    on org.onspec.Skip():s {
+      route Skip(id);
+    }
+
+    on org.onspec.Success() {
+      route Success(id);
+    }
+
+    org.onspec.Failure f;
+    on org.onspec.Failure():f {
+      route Failure(id, f.reason);
+    }
+
+    on org.onspec.Done() {
+      route SpecDone(id);
+      die;
+    }
   }
 }
 

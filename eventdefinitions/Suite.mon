@@ -3,6 +3,7 @@ package org.onspec;
 using org.onspec.internal.SpecDiscover;
 using org.onspec.internal.SpecPresent;
 using org.onspec.internal.SpecBegin;
+using org.onspec.internal.SpecPrepare;
 
 /**
  * Facade event to make easy write specs.
@@ -123,8 +124,8 @@ event Suite {
   action _handleNewSuite(action<> runnable) {
     integer id := getId();
     route SpecPresent(id);
-    SpecBegin begin;
-    on SpecBegin(id=id):begin {
+    SpecPrepare begin;
+    on SpecPrepare():begin {
       _runner.run(runnable, id, begin.config);
     }
   }

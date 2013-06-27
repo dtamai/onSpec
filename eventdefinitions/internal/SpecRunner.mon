@@ -14,7 +14,7 @@ event SpecRunner {
     self.specId := specId;
     specsMonitorEntryPoint := runnable;
     self.config := config;
-    discoverAllExamples(doSpawn);
+    discoverAllExamples();
   }
 
 
@@ -70,11 +70,11 @@ event SpecRunner {
     return integer.getUnique();
   }
 
-  action discoverAllExamples(action<> nextStep) {
+  action discoverAllExamples() {
     surroundingContext := createRootContext(self.specId);
     prepareDiscovery();
     rewindSpecMonitor();
-    openContextsForDiscovery(nextStep);
+    openContextsForDiscovery();
   }
 
   action prepareDiscovery() {
@@ -83,7 +83,7 @@ event SpecRunner {
     addConfig := configure;
   }
 
-  action openContextsForDiscovery(action<> nextStep) {
+  action openContextsForDiscovery() {
     if pendingContextsId.size() > 0 then {
       cursor := pendingContextsId[0];
       updateCurrentContext(cursor);
@@ -91,11 +91,12 @@ event SpecRunner {
       route Spec(cursor);
       on completed Spec(cursor) {
         pendingContextsId.remove(0);
-        openContextsForDiscovery(nextStep);
+        openContextsForDiscovery();
       }
     } else {
       disableDiscovery();
-      nextStep();
+      doSpawn();
+      route SpecReady(self.specId);
       die;
     }
   }
@@ -120,37 +121,16 @@ event SpecRunner {
   }
 
   action doSpawn() {
-    spawn runEntry();
+    spawn waitToRunExamples();
   }
 
-  action runEntry() {
-    listenProgressionEvents();
-    runExamples();
-  }
-
-  action runExamples() {
-    pendingExamplesId := defineExamplesOrder(examplesOrder);
-    runFirstExample();
-  }
-
-  action runFirstExample() {
-    if pendingExamplesId.size() > 0 then {
-      integer exId := pendingExamplesId[0];
-      cursor := exId;
-
-      spawn runExample(exId);
-      listener timeout := on wait (examples[exId].config.getTimeout()*2.0) {
-        route org.onspec.internal.Error(exId, "example died unexpectedly");
-        route SpecDone(exId);
+  action waitToRunExamples() {
+    integer id;
+    for id in examplesOrder {
+      on RunExample(id) {
+        cursor := id;
+        spawn runExample(id);
       }
-      on SpecDone(exId) {
-        timeout.quit();
-        pendingExamplesId.remove(0);
-        runFirstExample();
-      }
-    } else {
-      route SpecEnd(self.specId);
-      die;
     }
   }
 
@@ -184,36 +164,6 @@ event SpecRunner {
     surroundingContext.idSequenceToOpen.append(id);
   }
 
-  action listenProgressionEvents() {
-    org.onspec.Skip s;
-    on all org.onspec.Skip():s {
-      route Skip(cursor);
-    }
-
-    on all org.onspec.Success() {
-      route Success(cursor);
-    }
-
-    org.onspec.Failure f;
-    on all org.onspec.Failure():f {
-      route Failure(cursor, f.reason);
-    }
-
-    on all org.onspec.Done() {
-      route SpecDone(cursor);
-    }
-  }
-
-  action defineExamplesOrder(sequence<integer> list) returns sequence<integer> {
-    if config.shouldRandomize() then {
-      RandomGenerator generator := new RandomGenerator;
-      generator.init(config.getRandomSeed());
-      return Shuffler(generator).shuffle(list);
-    } else {
-      return list;
-    }
-  }
-
   // Identifies the client monitor
   integer specId;
 
@@ -236,8 +186,6 @@ event SpecRunner {
 
   // Used while discovering examples, holds the ids of contexts still closed
   sequence<integer> pendingContextsId;
-  // Used while running examples, is a modifiable copy of the examples list
-  sequence<integer> pendingExamplesId;
 
   // Holds all contexts, its is populated in the first run and must be
   // read-only after discovery is done

@@ -21,6 +21,16 @@ event SpecPresent {
 }
 
 /** @private */
+event SpecPrepare {
+  org.onspec.SuiteConfiguration config;
+}
+
+/** @private */
+event SpecReady {
+  integer id;
+}
+
+/** @private */
 event SpecDone {
   integer id;
 }
@@ -39,6 +49,11 @@ event ExampleDescription {
   wildcard string text;
   wildcard sequence<integer> parentContextsId;
   wildcard org.onspec.SuiteConfiguration config;
+}
+
+/** @private */
+event RunExample {
+  integer id;
 }
 
 /** @private */
