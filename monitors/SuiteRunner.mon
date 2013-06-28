@@ -118,11 +118,9 @@ monitor SuiteRunner {
     runFirstExample();
   }
 
-  integer cursor;
   action runFirstExample() {
     if pendingExamplesId.size() > 0 then {
       integer exId := pendingExamplesId[0];
-      cursor := exId;
 
        route RunExample(exId);
        on wait ((examples[exId].config.getTimeout()*2.0) + 0.5) and not SpecDone(exId) {
@@ -145,19 +143,6 @@ monitor SuiteRunner {
       return Shuffler(generator).shuffle(list);
     } else {
       return list;
-    }
-  }
-
-
-  /** @private */
-  action runSpec() {
-    if specs.size() <= 0 then { endSuite(); }
-
-    integer currId := specs[0];
-    route SpecBegin(currId, config);
-    on SpecEnd(currId) {
-      specs.remove(0);
-      runSpec();
     }
   }
 
