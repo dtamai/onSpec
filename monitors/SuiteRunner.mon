@@ -125,9 +125,9 @@ monitor SuiteRunner {
        route RunExample(exId);
        on wait ((examples[exId].config.getTimeout()*2.0) + 0.5) and not SpecDone(exId) {
          route org.onspec.internal.Error(exId, "example died unexpectedly");
-         route SpecDone(exId);
+         route org.onspec.Done();
        }
-       on SpecDone(exId) {
+       on completed SpecDone(exId) {
          pendingExamplesId.remove(0);
          runFirstExample();
        }
