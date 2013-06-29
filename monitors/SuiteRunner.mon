@@ -62,7 +62,11 @@ monitor SuiteRunner {
 
     on completed SpecDiscover() {
       disc.quit();
-      route SpecPrepare(config);
+
+      // Remove configuration items not required to run examples
+      SuiteConfiguration downstreamConfig := config.clone();
+      downstreamConfig.removeParam("randomSeed");
+      route SpecPrepare(downstreamConfig);
 
       SpecReady r;
       sequence<integer> knownSpecs := specs.clone();

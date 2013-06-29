@@ -38,6 +38,12 @@ event SuiteConfiguration {
     return config.hasKey(param);
   }
 
+  action removeParam(string paramName) {
+    if config.hasKey(paramName) then {
+      config.remove(paramName);
+    }
+  }
+
   action getIntegerOrElse(string param, integer orElse) returns integer {
     integer value := orElse;
     if config.hasKey(param) then {
@@ -100,5 +106,6 @@ event SuiteConfiguration {
 
     return SuiteConfiguration(newConfig);
   }
+
 }
 
