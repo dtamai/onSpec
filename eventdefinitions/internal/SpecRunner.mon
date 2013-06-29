@@ -146,14 +146,16 @@ event SpecRunner {
     }
 
     route Before();
-    route Spec(exampleId);
-    on wait (example.config.getTimeout()) and not SpecDone(exampleId) {
-      org.onspec.SpecReporter().fail("timeout");
-    }
-    on SpecDone(exampleId) {
-      route After();
-      on completed After() {
-        die;
+    on completed Before() {
+      route Spec(exampleId);
+      on wait (example.config.getTimeout()) and not SpecDone(exampleId) {
+        org.onspec.SpecReporter().fail("timeout");
+      }
+      on SpecDone(exampleId) {
+        route After();
+        on completed After() {
+          die;
+        }
       }
     }
   }
