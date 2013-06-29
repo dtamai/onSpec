@@ -106,3 +106,51 @@ monitor onSpecSample2 {
   }
 }
 
+event O {
+  integer n;
+}
+
+monitor BeforeAfterSpec {
+  Suite _;
+
+  action onload() {
+    _.init(run);
+
+    on (O(10) -> O(20) -> O(30))
+      and ((O(10) and O(11)) -> O(21) -> (O(30) and O(31))) {
+        print "[GOOD] BeforeAfter Ok";
+      }
+  }
+
+  action run() {
+    on Spec(_.describe("Before every context")) {
+      on Before() {
+        route O(10);
+      }
+
+      on Spec(_.it("runs the example")) {
+        route O(20);
+        _.done();
+      }
+
+      on Spec(_.describe("Inner contexts have many before")) {
+        on Before() {
+          route O(11);
+        }
+
+        on After() {
+          route O(31);
+        }
+
+        on Spec(_.it("runs each of them")) {
+          route O(21);
+          _.done();
+        }
+      }
+
+      on After() {
+        route O(30);
+      }
+    }
+  }
+}

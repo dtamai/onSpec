@@ -20,3 +20,29 @@ event Spec {
 event NewSuite {
 }
 
+/**
+ * Trigger for a Before block that runs before an example
+ *
+ * Each context can have many Before blocks, each of them will be invoked
+ * in an unknown order (now it is the same order in which they are defined,
+ * but it may change if the technology change).
+ * Note that an example belongs to all contexts surrounding it, so all Before
+ * blocks will be triggered.
+ */
+event Before {
+}
+
+/**
+ * Trigger for a After block that runs after an example
+ *
+ * Each context can have many After blocks, each of them will be invoked
+ * in an unknown order (now it is the same order in which they are defined,
+ * but it may change if the technology change).
+ * Note that an example belongs to all contexts surrounding it, so all After
+ * blocks will be triggered.
+ * Usually After blocks are not necessary, because the whole context terminates
+ * after the example is completed.
+ */
+event After {
+}
+
