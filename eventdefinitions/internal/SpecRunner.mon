@@ -62,9 +62,8 @@ event SpecRunner {
   }
 
   action storeExample(string text, integer id) {
-    examplesMap[text] := id;
-    examplesOrder.append(id);
     examples[id] := ExampleDescription(id, text, surroundingContext.idSequenceToOpen.clone(), buildLocalConfig());
+    examplesMap[text] := id;
     route examples[id];
   }
 
@@ -73,7 +72,10 @@ event SpecRunner {
   }
 
   action discoverAllExamples() {
-    surroundingContext := createRootContext(self.specId);
+    ContextDescription rootContext := new ContextDescription;
+    rootContext.id := self.specId;
+
+    surroundingContext := rootContext;
     prepareDiscovery();
     rewindSpecMonitor();
     openContextsForDiscovery();
@@ -128,7 +130,7 @@ event SpecRunner {
 
   action waitToRunExamples() {
     integer id;
-    for id in examplesOrder {
+    for id in examples.keys() {
       on RunExample(id) {
         cursor := id;
         spawn runExample(id);
@@ -160,13 +162,6 @@ event SpecRunner {
     }
   }
 
-  action createRootContext(integer id) returns ContextDescription {
-    ContextDescription c := new ContextDescription;
-    c.id := id;
-    c.idSequenceToOpen := [];
-    return c;
-  }
-
   action updateCurrentContext(integer id) {
     surroundingContext := contexts[id];
     surroundingContext.idSequenceToOpen.append(id);
@@ -180,7 +175,6 @@ event SpecRunner {
 
   dictionary<string /*text*/, integer /*id*/> contextsMap;
   dictionary<string /*text*/, integer /*id*/> examplesMap;
-  sequence<integer /*id*/> examplesOrder;
 
   // Current context/example. While in discovery, its value is the current
   // context; while running examples, its value is the current example
