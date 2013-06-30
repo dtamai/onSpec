@@ -6,6 +6,7 @@ using org.onspec.SuiteConfiguration;
 /**
  * Monitor that manages running specs.
  * @listens NewSuite Runs a new spec suite
+ * @listens SuiteConfiguration Configure (optional) how the suite runs
  */
 monitor SuiteRunner {
   /** @private */
@@ -65,7 +66,7 @@ monitor SuiteRunner {
 
       // Remove configuration items not required to run examples
       SuiteConfiguration downstreamConfig := config.clone();
-      downstreamConfig.removeParam("randomSeed");
+      downstreamConfig.removeParam(SuiteConfiguration.randomSeedParamName);
       route SpecPrepare(downstreamConfig);
 
       SpecReady r;
@@ -105,11 +106,15 @@ monitor SuiteRunner {
 
   /** @private */
   action handleConfiguration() {
+    config := config.merge(config.fromString(config.configString));
     if config.shouldRandomize() then {
       if not config.hasRandomSeed() then {
         config.setRandomSeed((new RandomGenerator).next());
+        print "Random seed (use the config below to repeat examples order):";
+        print "," + SuiteConfiguration.randomSeedParamName + ":" + config.getRandomSeed().toString();
+      } else {
+        print "Using configured random seed: " + config.getRandomSeed().toString();
       }
-      print "Random seed: " + config.getRandomSeed().toString();
     } else {
       print "!! [WARN] Runing specs in order !!";
     }
