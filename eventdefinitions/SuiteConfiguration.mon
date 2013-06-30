@@ -1,7 +1,8 @@
 package org.onspec;
 
 event SuiteConfiguration {
-  dictionary<string, string> config;
+  wildcard string configString;
+  wildcard dictionary<string, string> config;
 
   constant string kvPairSep := ", ";
   constant string kvSep := ":";
@@ -92,7 +93,7 @@ event SuiteConfiguration {
         log "Expected a parseable configuration string in " + kv.toString() at ERROR;
       }
     }
-    return SuiteConfiguration(configuration);
+    return SuiteConfiguration("", configuration);
   }
 
   action merge(SuiteConfiguration other) returns SuiteConfiguration {
@@ -104,7 +105,7 @@ event SuiteConfiguration {
       newConfig[otherK] := other.config[otherK];
     }
 
-    return SuiteConfiguration(newConfig);
+    return SuiteConfiguration("", newConfig);
   }
 
 }
