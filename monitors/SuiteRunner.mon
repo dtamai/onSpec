@@ -24,6 +24,8 @@ monitor SuiteRunner {
   /** @private */
   sequence<string> errors := [];
   /** @private */
+  boolean isConfigured := false;
+  /** @private */
   SuiteConfiguration config;
 
   import "TimeFormatPlugin" as time;
@@ -33,10 +35,18 @@ monitor SuiteRunner {
   /** @private */
   action onload() {
     on all SuiteConfiguration():config {
+      isConfigured := true;
       handleConfiguration();
     }
 
     on all NewSuite() {
+      if not isConfigured then {
+        useDefaultConfiguration();
+        // Do not cache configuration
+        on completed SuiteConfiguration() {
+          isConfigured := false;
+        }
+      }
       beginTime := time.getMicroTime();
       spawn handleNewSuite();
     }
@@ -118,6 +128,11 @@ monitor SuiteRunner {
     } else {
       print "!! [WARN] Runing specs in order !!";
     }
+  }
+
+  /** @private */
+  action useDefaultConfiguration() {
+    route new SuiteConfiguration;
   }
 
   // Used while running examples, is a modifiable copy of the examples list
