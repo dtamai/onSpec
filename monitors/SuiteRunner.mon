@@ -234,12 +234,15 @@ monitor ExampleResultListener {
     }
 
     org.onspec.Failure f;
-    on org.onspec.Failure():f {
+    on all org.onspec.Failure():f {
       route Failure(id, f.reason);
     }
 
     on org.onspec.Done() {
-      route SpecDone(id);
+      enqueue SpecDone(id);
+    }
+
+    on SpecDone(id) {
       die;
     }
   }
