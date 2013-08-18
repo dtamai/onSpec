@@ -184,13 +184,19 @@ monitor SuiteRunner {
 
   /** @private */
   action getContextDescriptionList(integer exampleId) returns sequence<string> {
-    sequence<string> ctxList := [];
-    integer ctxId;
-    for ctxId in examples[exampleId].parentContextsId {
-      ctxList.append(contexts[ctxId].text);
-    }
+    sequence<string> ctxList := contextsToTexts(examples[exampleId].parentContextsId);
     ctxList.append(examples[exampleId].text);
     return ctxList;
+  }
+
+  /** @private */
+  action contextsToTexts(sequence<integer> ctxIds) returns sequence<string> {
+    sequence<string> text := [];
+    integer ctxId;
+    for ctxId in ctxIds {
+      text.append(contexts[ctxId].text);
+    }
+    return text;
   }
 
   /** @private */
@@ -222,7 +228,7 @@ monitor SuiteRunner {
       print "Examples that could not be run: ";
       SkippedExampleDescription skip;
       for skip in skipped {
-        print skip.text + " " + skip.reason;
+        print "'" + " ".join(contextsToTexts(skip.parentContextsId)) + " " + skip.text + "': " + skip.reason;
       }
     }
     die;
