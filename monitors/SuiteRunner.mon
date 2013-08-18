@@ -16,6 +16,8 @@ monitor SuiteRunner {
   /** @private */
   dictionary<integer /*id*/, ExampleDescription> examples := {};
   /** @private */
+  sequence<SkippedExampleDescription> skipped := [];
+  /** @private */
   sequence<string> results := [];
   /** @private */
   sequence<string> failures := [];
@@ -69,6 +71,11 @@ monitor SuiteRunner {
     ExampleDescription ex;
     on all ExampleDescription():ex {
       examples[ex.id] := ex;
+    }
+
+    SkippedExampleDescription skip;
+    on all SkippedExampleDescription():skip {
+      skipped.append(skip);
     }
 
     on completed SpecDiscover() {
@@ -210,6 +217,13 @@ monitor SuiteRunner {
       print "Errors: ";
       print "\n".join(errors);
       print "";
+    }
+    if skipped.size() > 0 then {
+      print "Examples that could not be run: ";
+      SkippedExampleDescription skip;
+      for skip in skipped {
+        print skip.text + " " + skip.reason;
+      }
     }
     die;
   }
