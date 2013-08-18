@@ -107,6 +107,18 @@ monitor onSpecSample2 {
         _.fail("failed once");
         _.fail("failed again");
       }
+
+      on Spec(_.describe("with repeated examples")) {
+        // a repeated example being two exmples with the same text in the
+        // same file
+        on Spec(_.it("skips the second to run")) {
+          _.done();
+        }
+
+        on Spec(_.it("skips the second to run")) {
+          _.done();
+        }
+      }
     }
   }
 }
