@@ -10,6 +10,7 @@ event SpecRunner {
 
   action<string> returns integer addContext;
   action<string> returns integer addSpec;
+  action<string> returns integer ignoreSpec;
   action<string> addConfig;
 
   action run(action<> runnable, integer specId, SuiteConfiguration config) {
@@ -58,6 +59,15 @@ event SpecRunner {
     }
   }
 
+  action registerIgnoredExample(string text) returns integer {
+    route SkippedExampleDescription(text, surroundingContext.idSequenceToOpen.clone(), "ignored");
+    return -1;
+  }
+
+  action noopIgnore(string text) returns integer {
+    return -1;
+  }
+
   action noopConfig(string configString) {
   }
 
@@ -95,6 +105,7 @@ event SpecRunner {
     addContext := discoverContext;
     addSpec := discoverExample;
     addConfig := configure;
+    ignoreSpec := registerIgnoredExample;
   }
 
   action openContextsForDiscovery() {
@@ -127,6 +138,7 @@ event SpecRunner {
     addContext := repeatContextsId;
     addSpec := repeatExamplesId;
     addConfig := noopConfig;
+    ignoreSpec := noopIgnore;
   }
 
   action rewindSpecMonitor() {
