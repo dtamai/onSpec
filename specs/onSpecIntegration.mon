@@ -75,6 +75,12 @@ monitor onSpecSample {
         $.pass();
       }
     }
+
+    on Spec($.describe("The fourth example")) {
+      on Spec($.ignore("is ignored")) {
+        $.fail("this should not fail");
+      }
+    }
   }
 }
 

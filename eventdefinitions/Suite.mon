@@ -44,6 +44,16 @@ event Suite {
   }
 
   /**
+   * Ignore an example.
+   * Change #it() for #ignore() to not run the example.
+   * @param text Description of the example
+   * @return The id that identifies this example
+   */
+  action ignore(string text) returns integer {
+    return _runner.ignoreSpec(text);
+  }
+
+  /**
    * Customize the configuration for the next context/example declared.
    * If before a context, the configuration applies to every example inside
    * that context.

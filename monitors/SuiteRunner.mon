@@ -225,7 +225,7 @@ monitor SuiteRunner {
       print "";
     }
     if skipped.size() > 0 then {
-      print "Examples that could not be run: ";
+      print "Examples that did not run: ";
       SkippedExampleDescription skip;
       for skip in skipped {
         print "'" + " ".join(contextsToTexts(skip.parentContextsId)) + " " + skip.text + "': " + skip.reason;
