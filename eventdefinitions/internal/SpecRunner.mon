@@ -61,7 +61,7 @@ event SpecRunner {
 
   action registerIgnoredExample(string text) returns integer {
     integer id := getId();
-    route SkippedExampleDescription(id, text, surroundingContext.idSequenceToOpen.clone(), "ignored");
+    route IgnoredExampleDescription(id, text, surroundingContext.idSequenceToOpen.clone());
     return id;
   }
 

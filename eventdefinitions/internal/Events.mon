@@ -53,9 +53,17 @@ event ExampleDescription {
 
 /** @private */
 event SkippedExampleDescription {
+  wildcard integer id;
   wildcard string text;
   wildcard sequence<integer> parentContextsId;
   wildcard string reason;
+}
+
+/** @private */
+event IgnoredExampleDescription {
+  wildcard integer id;
+  wildcard string text;
+  wildcard sequence<integer> parentContextsId;
 }
 
 /** @private */

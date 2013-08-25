@@ -16,7 +16,7 @@ monitor SuiteRunner {
   /** @private */
   dictionary<integer /*id*/, ExampleDescription> examples := {};
   /** @private */
-  sequence<SkippedExampleDescription> skipped := [];
+  sequence<integer> examplesOrder := [];
   /** @private */
   dictionary<integer, string> results := {};
   /** @private */
@@ -75,7 +75,14 @@ monitor SuiteRunner {
 
     SkippedExampleDescription skip;
     on all SkippedExampleDescription():skip {
-      skipped.append(skip);
+      registerResult(skip.id, "E", errors,
+          "'" + " ".join(contextsToTexts(skip.parentContextsId)) + " " + skip.text + "' " + skip.reason);
+    }
+
+    IgnoredExampleDescription ignore;
+    on all IgnoredExampleDescription():ignore {
+      registerResult(ignore.id, "S", skips,
+          "'" + " ".join(contextsToTexts(ignore.parentContextsId)) + " " + ignore.text + "' ignored");
     }
 
     on completed SpecDiscover() {
@@ -99,36 +106,37 @@ monitor SuiteRunner {
 
     Failure f;
     on all Failure():f {
-      if not failures.hasKey(f.id) then {
-        results[f.id] := "F";
-        failures[f.id] := new sequence<string>;
-      }
-      failures[f.id].append("'" + expandContextString(f.id) + "' failed: " + f.reason);
+      registerResult(f.id, "F", failures,
+          "'" + expandContextString(f.id) + "' failed: " + f.reason);
     }
 
     Success su;
     on all Success():su {
+      examplesOrder.append(su.id);
       results[su.id] := ".";
     }
 
     Skip s;
     on all Skip():s {
-      if not skips.hasKey(s.id) then {
-        results[s.id] := "S";
-        skips[s.id] := new sequence<string>;
-      }
-      skips[s.id].append("'" + expandContextString(s.id) + "' skipped");
+      registerResult(s.id, "S", skips,
+          "'" + expandContextString(s.id) + "' skipped");
     }
 
     Error e;
     on all Error():e {
-      if not errors.hasKey(e.id) then {
-        results[e.id] := "E";
-        errors[e.id] := new sequence<string>;
-      }
-      errors[e.id].append("'" + expandContextString(e.id) + "' ERROR: " + e.reason);
+      registerResult(e.id, "E", errors,
+          "'" + expandContextString(e.id) + "' ERROR: " + e.reason);
     }
 
+  }
+
+  action registerResult(integer id, string status, dictionary<integer, sequence<string> > bucket, string text) {
+    if not bucket.hasKey(id) then {
+      examplesOrder.append(id);
+      results[id] := status;
+      bucket[id] := new sequence<string>;
+    }
+    bucket[id].append(text);
   }
 
   /** @private */
@@ -212,7 +220,12 @@ monitor SuiteRunner {
   /** @private */
   action endSuite() {
     print "";
-    print "".join(results.values());
+    sequence<string> orderedResults := [];
+    integer id;
+    for id in examplesOrder {
+      orderedResults.append(results[id]);
+    }
+    print "".join(orderedResults);
     print results.size().toString() + " example(s) in " +
       (time.getMicroTime() - beginTime).formatFixed(6) + "s | " +
       skips.size().toString() + " skip(s) | " +
@@ -241,13 +254,6 @@ monitor SuiteRunner {
         print "\n".join(r);
       }
       print "";
-    }
-    if skipped.size() > 0 then {
-      print "Examples that did not run: ";
-      SkippedExampleDescription skip;
-      for skip in skipped {
-        print "'" + " ".join(contextsToTexts(skip.parentContextsId)) + " " + skip.text + "': " + skip.reason;
-      }
     }
     die;
   }
