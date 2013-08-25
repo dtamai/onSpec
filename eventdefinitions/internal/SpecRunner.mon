@@ -46,15 +46,19 @@ event SpecRunner {
   }
 
   action repeatContextsId(string text) returns integer {
-    return contextsMap[text];
+    if contextsMap.hasKey(text) then {
+      return contextsMap[text];
+    } else {
+      route SkippedExampleDescription(getId(), text, new sequence<integer>, "unreacheable context");
+      return -1;
+    }
   }
 
   action repeatExamplesId(string text) returns integer {
-    if givenExamples.indexOf(text) < 0 then {
-      givenExamples.append(text);
+    if examplesMap.hasKey(text) then {
       return examplesMap[text];
     } else {
-      // return an invalid number to be sure that the example will not open
+      route SkippedExampleDescription(getId(), text, new sequence<integer>, "unreacheable example");
       return -1;
     }
   }
@@ -198,7 +202,6 @@ event SpecRunner {
 
   dictionary<string /*text*/, integer /*id*/> contextsMap;
   dictionary<string /*text*/, integer /*id*/> examplesMap;
-  sequence<string> givenExamples;
 
   // Current context/example. While in discovery, its value is the current
   // context; while running examples, its value is the current example
