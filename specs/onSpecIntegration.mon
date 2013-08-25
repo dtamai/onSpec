@@ -110,6 +110,7 @@ monitor onSpecSample2 {
       }
 
       on Spec(_.it("gives many chances for failure")) {
+        _.skip();
         _.fail("failed once");
         _.fail("failed again");
       }

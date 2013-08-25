@@ -18,13 +18,13 @@ monitor SuiteRunner {
   /** @private */
   sequence<SkippedExampleDescription> skipped := [];
   /** @private */
-  sequence<string> results := [];
+  dictionary<integer, string> results := {};
   /** @private */
-  sequence<string> failures := [];
+  dictionary<integer, sequence<string> > failures := {};
   /** @private */
-  sequence<string> skips := [];
+  dictionary<integer, sequence<string> > skips := {};
   /** @private */
-  sequence<string> errors := [];
+  dictionary<integer, sequence<string> > errors := {};
   /** @private */
   boolean isConfigured := false;
   /** @private */
@@ -99,24 +99,34 @@ monitor SuiteRunner {
 
     Failure f;
     on all Failure():f {
-      results.append("F");
-      failures.append("'" + expandContextString(f.id) + "' failed: " + f.reason);
+      if not failures.hasKey(f.id) then {
+        results[f.id] := "F";
+        failures[f.id] := new sequence<string>;
+      }
+      failures[f.id].append("'" + expandContextString(f.id) + "' failed: " + f.reason);
     }
 
-    on all Success() {
-      results.append(".");
+    Success su;
+    on all Success():su {
+      results[su.id] := ".";
     }
 
     Skip s;
     on all Skip():s {
-      results.append("S");
-      skips.append("'" + expandContextString(s.id) + "' skipped");
+      if not skips.hasKey(s.id) then {
+        results[s.id] := "S";
+        skips[s.id] := new sequence<string>;
+      }
+      skips[s.id].append("'" + expandContextString(s.id) + "' skipped");
     }
 
     Error e;
     on all Error():e {
-      results.append("E");
-      errors.append("'" + expandContextString(e.id) + "' ERROR: " + e.reason);
+      if not errors.hasKey(e.id) then {
+        results[e.id] := "E";
+        errors[e.id] := new sequence<string>;
+      }
+      errors[e.id].append("'" + expandContextString(e.id) + "' ERROR: " + e.reason);
     }
 
   }
@@ -202,26 +212,34 @@ monitor SuiteRunner {
   /** @private */
   action endSuite() {
     print "";
-    print "".join(results);
+    print "".join(results.values());
     print results.size().toString() + " example(s) in " +
       (time.getMicroTime() - beginTime).formatFixed(6) + "s | " +
       skips.size().toString() + " skip(s) | " +
       failures.size().toString() + " failure(s) | " +
       errors.size().toString() + " error(s)";
     print "";
+
+    sequence<string> r;
     if skips.size() > 0 then {
       print "Skips: ";
-      print "\n".join(skips);
+      for r in skips.values() {
+        print "\n".join(r);
+      }
       print "";
     }
     if failures.size() > 0 then {
       print "Failures: ";
-      print "\n".join(failures);
+      for r in failures.values() {
+        print "\n".join(r);
+      }
       print "";
     }
     if errors.size() > 0 then {
       print "Errors: ";
-      print "\n".join(errors);
+      for r in errors.values() {
+        print "\n".join(r);
+      }
       print "";
     }
     if skipped.size() > 0 then {

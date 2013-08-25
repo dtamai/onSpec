@@ -60,8 +60,9 @@ event SpecRunner {
   }
 
   action registerIgnoredExample(string text) returns integer {
-    route SkippedExampleDescription(text, surroundingContext.idSequenceToOpen.clone(), "ignored");
-    return -1;
+    integer id := getId();
+    route SkippedExampleDescription(id, text, surroundingContext.idSequenceToOpen.clone(), "ignored");
+    return id;
   }
 
   action noopIgnore(string text) returns integer {
@@ -79,7 +80,7 @@ event SpecRunner {
 
   action storeExample(string text, integer id) {
     if examplesMap.hasKey(text) then {
-      route SkippedExampleDescription(text, surroundingContext.idSequenceToOpen.clone(), "duplicate");
+      route SkippedExampleDescription(id, text, surroundingContext.idSequenceToOpen.clone(), "duplicate");
     } else {
       examples[id] := ExampleDescription(id, text, surroundingContext.idSequenceToOpen.clone(), buildLocalConfig());
       examplesMap[text] := id;
