@@ -11,8 +11,10 @@
 
 	<target name="version">
 		<loadfile property="version.file" srcFile="eventdefinitions/onSpec.mon"/>
-		<propertyregex property="version" input="${version.file}" regexp="version := &quot;([^&quot;]*)" select="\1"/>
-		<echo message="${version}"/>
+		<propertyregex property="version"
+			input="${version.file}"
+			regexp="version := &quot;([^&quot;]*)"
+			select="\1"/>
 	</target>
 
 	<target name="package" depends="init, version">
