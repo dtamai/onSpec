@@ -81,6 +81,14 @@ monitor onSpecSample {
         $.fail("this should not fail");
       }
     }
+
+    on Spec($.describe("The fifth example")) {
+      on Spec($.it("has some weird cases")) {
+        on Spec($.describe("this is a bad context")) {}
+        on Spec($.it("is just nonsense")) {}
+        $.done();
+      }
+    }
   }
 }
 
