@@ -1,0 +1,42 @@
+package org.onspec;
+
+event SpecNode {
+  wildcard integer id;
+  wildcard string text;
+  wildcard boolean isTerminal;
+
+  // valid if is a context (isTerminal = false)
+  wildcard sequence<integer> childrenId;
+
+  // valid if is an example (isTerminal = true)
+  wildcard sequence<string> results;
+  wildcard sequence<string> reasons;
+
+  action appendChildren(integer id) { childrenId.append(id); }
+
+  action addResult(string result, string reason) {
+    results.append(result);
+    results.append(reason);
+  }
+}
+
+/**
+ * Container for the results of a suite run
+ */
+event SuiteResult {
+
+  sequence<integer /*exampleId*/> examplesOrder;
+
+  dictionary<integer /*nodeId*/, SpecNode> nodes;
+
+  action getNode(integer nodeId) returns SpecNode {
+    return nodes[nodeId];
+  }
+
+  action hasNode(integer nodeId) returns boolean {
+    return nodes.hasKey(nodeId);
+  }
+
+  // TODO: enable nodes' traversal
+}
+
