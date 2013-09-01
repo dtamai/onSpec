@@ -1,0 +1,42 @@
+package org.onspec;
+
+event SpecResult {
+  constant string SUCCESS := ".";
+  constant string FAILURE := "F";
+  constant string SKIP := "S";
+  constant string ERROR := "E";
+  constant string UNKNOWN := "?";
+}
+
+event SpecNode {
+  wildcard integer id;
+  wildcard string text;
+  wildcard boolean isTerminal;
+
+  // valid if is a context (isTerminal = false)
+  wildcard sequence<integer> childrenId;
+
+  // valid if is an example (isTerminal = true)
+  wildcard sequence<string> results;
+  wildcard sequence<string> reasons;
+
+  action appendChildren(integer id) { childrenId.append(id); }
+
+  action addResult(string result, string reason) {
+    results.append(result);
+    results.append(reason);
+  }
+
+  action getMostRelevantResult() returns string {
+    string r := SpecResult.UNKNOWN;
+    for r in results {
+      if r = SpecResult.ERROR then { break; }
+      if r = SpecResult.FAILURE then { break; }
+      if r = SpecResult.SKIP then { break; }
+      if r = SpecResult.SUCCESS then { break; }
+    }
+    return r;
+  }
+
+}
+
