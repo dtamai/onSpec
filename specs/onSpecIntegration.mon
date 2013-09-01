@@ -124,6 +124,7 @@ monitor onSpecSample2 {
         _.skip();
         _.fail("failed once");
         _.fail("failed again");
+        _.pass();
       }
 
       on Spec(_.describe("with repeated examples")) {
