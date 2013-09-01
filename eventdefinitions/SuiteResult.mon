@@ -25,6 +25,14 @@ event SuiteResult {
     return filterIn(filterInSkips);
   }
 
+  action getFailures() returns sequence<SpecNode> {
+    return filterIn(filterInFailures);
+  }
+
+  action getErrors() returns sequence<SpecNode> {
+    return filterIn(filterInErrors);
+  }
+
   action filterIn(action<SpecNode> returns boolean filter) returns sequence<SpecNode> {
     sequence<SpecNode> result := [];
     SpecNode node;
@@ -39,6 +47,14 @@ event SuiteResult {
 
   action filterInSkips(SpecNode node) returns boolean {
     return node.results.indexOf(SpecResult.SKIP) > -1;
+  }
+
+  action filterInFailures(SpecNode node) returns boolean {
+    return node.results.indexOf(SpecResult.FAILURE) > -1;
+  }
+
+  action filterInErrors(SpecNode node) returns boolean {
+    return node.results.indexOf(SpecResult.ERROR) > -1;
   }
 
   // TODO: enable nodes' traversal
