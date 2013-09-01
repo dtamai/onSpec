@@ -2,6 +2,8 @@
 
 using org.onspec.NewSuite;
 using org.onspec.SuiteConfiguration;
+using org.onspec.SuiteResult;
+using org.onspec.SpecNode;
 
 /**
  * Monitor that manages running specs.
@@ -16,15 +18,17 @@ monitor SuiteRunner {
   /** @private */
   dictionary<integer /*id*/, ExampleDescription> examples := {};
   /** @private */
-  sequence<integer> examplesOrder := [];
-  /** @private */
   dictionary<integer, string> results := {};
   /** @private */
   dictionary<integer, sequence<string> > failures := {};
   /** @private */
+  dictionary<integer, sequence<string> > successes := {};
+  /** @private */
   dictionary<integer, sequence<string> > skips := {};
   /** @private */
   dictionary<integer, sequence<string> > errors := {};
+  /** @private */
+  SuiteResult suiteResult;
   /** @private */
   boolean isConfigured := false;
   /** @private */
@@ -56,6 +60,9 @@ monitor SuiteRunner {
 
   /** @private */
   action handleNewSuite() {
+    suiteResult := new SuiteResult;
+    suiteResult.nodes[0] := newContextNode(0, "");
+
     route SpecDiscover();
 
     SpecPresent spec;
@@ -66,22 +73,28 @@ monitor SuiteRunner {
     ContextDescription ctx;
     on all ContextDescription():ctx {
       contexts[ctx.id] := ctx;
+
+      suiteResult.nodes[ctx.id] := newContextNode(ctx.id, ctx.text);
+      suiteResult.nodes[ctx.getParentId()].appendChildren(ctx.id);
     }
 
     ExampleDescription ex;
     on all ExampleDescription():ex {
       examples[ex.id] := ex;
+
+      suiteResult.nodes[ex.id] := newExampleNode(ex.id, ex.text);
+      suiteResult.nodes[ex.getParentId()].appendChildren(ex.id);
     }
 
     SkippedExampleDescription skip;
     on all SkippedExampleDescription():skip {
-      registerResult(skip.id, "E", errors,
+      registerError(skip.id,
           "'" + " ".join(contextsToTexts(skip.parentContextsId)) + " " + skip.text + "' " + skip.reason);
     }
 
     IgnoredExampleDescription ignore;
     on all IgnoredExampleDescription():ignore {
-      registerResult(ignore.id, "S", skips,
+      registerSkip(ignore.id,
           "'" + " ".join(contextsToTexts(ignore.parentContextsId)) + " " + ignore.text + "' ignored");
     }
 
@@ -106,37 +119,74 @@ monitor SuiteRunner {
 
     Failure f;
     on all Failure():f {
-      registerResult(f.id, "F", failures,
+      registerFailure(f.id,
           "'" + expandContextString(f.id) + "' failed: " + f.reason);
     }
 
     Success su;
     on all Success():su {
-      examplesOrder.append(su.id);
-      results[su.id] := ".";
+      registerSuccess(su.id);
     }
 
     Skip s;
     on all Skip():s {
-      registerResult(s.id, "S", skips,
+      registerSkip(s.id,
           "'" + expandContextString(s.id) + "' skipped");
     }
 
     Error e;
     on all Error():e {
-      registerResult(e.id, "E", errors,
+      registerError(e.id,
           "'" + expandContextString(e.id) + "' ERROR: " + e.reason);
     }
 
   }
 
+  action newExampleNode(integer id, string text) returns SpecNode {
+    SpecNode node := new SpecNode;
+    node.id := id;
+    node.text := text;
+    node.isTerminal := true;
+    return node;
+  }
+
+  action newContextNode(integer id, string text) returns SpecNode {
+    SpecNode node := new SpecNode;
+    node.id := id;
+    node.text := text;
+    return node;
+  }
+
+  action registerFailure(integer id, string text) {
+    registerResult(id, "F", failures, text);
+  }
+
+  action registerSuccess(integer id) {
+    registerResult(id, ".", successes, "");
+  }
+
+  action registerSkip(integer id, string text) {
+    registerResult(id, "S", skips, text);
+  }
+
+  action registerError(integer id, string text) {
+    registerResult(id, "E", errors, text);
+  }
+
   action registerResult(integer id, string status, dictionary<integer, sequence<string> > bucket, string text) {
     if not bucket.hasKey(id) then {
-      examplesOrder.append(id);
+      suiteResult.examplesOrder.append(id);
       results[id] := status;
       bucket[id] := new sequence<string>;
     }
     bucket[id].append(text);
+
+    if suiteResult.hasNode(id) then {
+      SpecNode node := suiteResult.getNode(id);
+      node.addResult(status, text);
+    } else {
+      print text;
+    }
   }
 
   /** @private */
@@ -222,7 +272,7 @@ monitor SuiteRunner {
     print "";
     sequence<string> orderedResults := [];
     integer id;
-    for id in examplesOrder {
+    for id in suiteResult.examplesOrder {
       orderedResults.append(results[id]);
     }
     print "".join(orderedResults);
@@ -255,6 +305,15 @@ monitor SuiteRunner {
       }
       print "";
     }
+    sequence<SpecNode> nn := [];
+    SpecNode n;
+    for n in suiteResult.nodes.values() {
+      if n.isTerminal then {
+        nn.append(n);
+      }
+    }
+    print nn.toString();
+    print suiteResult.toString();
     die;
   }
 }
