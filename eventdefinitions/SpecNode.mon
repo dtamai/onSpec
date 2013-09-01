@@ -27,16 +27,12 @@ event SpecNode {
     results.append(reason);
   }
 
-  action getMostRelevantResult() returns string {
-    string r := SpecResult.UNKNOWN;
-    for r in results {
-      if r = SpecResult.ERROR then { break; }
-      if r = SpecResult.FAILURE then { break; }
-      if r = SpecResult.SKIP then { break; }
-      if r = SpecResult.SUCCESS then { break; }
+  action getFormattedResult() returns string {
+    if results.size() = 1 then {
+      return results[0];
+    } else {
+      return "(" + "/".join(results) + ")";
     }
-    return r;
   }
-
 }
 
