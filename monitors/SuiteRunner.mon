@@ -191,18 +191,20 @@ monitor SuiteRunner {
   }
 
   action registerResult(integer id, string status, dictionary<integer, sequence<string> > bucket, string text) {
-    if not bucket.hasKey(id) then {
-      if suiteResult.examplesOrder.indexOf(id) = -1 then {
-        suiteResult.examplesOrder.append(id);
-      }
-      bucket[id] := new sequence<string>;
+
+    if suiteResult.examplesOrder.indexOf(id) = -1 then {
+      suiteResult.examplesOrder.append(id);
     }
-    bucket[id].append(text);
 
     if suiteResult.hasNode(id) then {
       SpecNode node := suiteResult.getNode(id);
       node.addResult(status, text);
     }
+
+    if not bucket.hasKey(id) then {
+      bucket[id] := new sequence<string>;
+    }
+    bucket[id].append(text);
   }
 
   /** @private */
@@ -230,6 +232,7 @@ monitor SuiteRunner {
   sequence<integer> pendingExamplesId;
   action runExamples() {
     pendingExamplesId := defineExamplesOrder(examples.keys());
+    suiteResult.examplesOrder.appendSequence(pendingExamplesId.clone());
     runFirstExample();
   }
 
@@ -299,10 +302,16 @@ monitor SuiteRunner {
       errors.size().toString() + " error(s)";
     print "";
 
+    sequence<sequence<string> > skips := [];
+    SpecNode node;
+    for node in suiteResult.getSkips() {
+      skips.append(node.reasons);
+    }
+
     sequence<string> r;
     if skips.size() > 0 then {
       print "Skips: ";
-      for r in skips.values() {
+      for r in skips {
         print "\n".join(r);
       }
       print "";
