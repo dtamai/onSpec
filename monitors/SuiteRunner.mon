@@ -292,7 +292,7 @@ monitor SuiteRunner {
     sequence<string> orderedResults := [];
     integer id;
     for id in suiteResult.examplesOrder {
-      orderedResults.append(suiteResult.getNode(id).getMostRelevantResult());
+      orderedResults.append(suiteResult.getNode(id).getFormattedResult());
     }
     print "".join(orderedResults);
     print orderedResults.size().toString() + " example(s) in " +
