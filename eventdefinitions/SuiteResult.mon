@@ -17,6 +17,30 @@ event SuiteResult {
     return nodes.hasKey(nodeId);
   }
 
+  action getNodes() returns sequence<SpecNode> {
+    return nodes.values();
+  }
+
+  action getSkips() returns sequence<SpecNode> {
+    return filterIn(filterInSkips);
+  }
+
+  action filterIn(action<SpecNode> returns boolean filter) returns sequence<SpecNode> {
+    sequence<SpecNode> result := [];
+    SpecNode node;
+    for node in getNodes() {
+      if filter(node) then {
+        result.append(node);
+      }
+    }
+
+    return result;
+  }
+
+  action filterInSkips(SpecNode node) returns boolean {
+    return node.results.indexOf(SpecResult.SKIP) > -1;
+  }
+
   // TODO: enable nodes' traversal
 }
 
