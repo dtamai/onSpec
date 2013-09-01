@@ -1,0 +1,70 @@
+package org.onspec;
+
+monitor ConsoleReporter {
+
+  action onload() {
+    SuiteResult result;
+    on all unmatched SuiteResult():result {
+      handleResult(result);
+    }
+  }
+
+  action handleResult(SuiteResult result) {
+      print "";
+    sequence<string> orderedResults := [];
+    integer id;
+    for id in result.examplesOrder {
+      orderedResults.append(result.getNode(id).getFormattedResult());
+    }
+    sequence<sequence<string> > temp := [];
+    sequence<string> r;
+    SpecNode node;
+
+    for node in result.getSkips() {
+      temp.append(node.reasons);
+    }
+    integer nSkips := temp.size();
+    if temp.size() > 0 then {
+      print "Skips: ";
+      for r in temp {
+        print "\n".join(r);
+      }
+      print "";
+    }
+    temp.clear();
+
+    for node in result.getFailures() {
+      temp.append(node.reasons);
+    }
+    integer nFailures := temp.size();
+    if temp.size() > 0 then {
+      print "Failures: ";
+      for r in temp {
+        print "\n".join(r);
+      }
+      print "";
+    }
+    temp.clear();
+
+    for node in result.getErrors() {
+      temp.append(node.reasons);
+    }
+    integer nErrors := temp.size();
+    if temp.size() > 0 then {
+      print "Errors: ";
+      for r in temp {
+        print "\n".join(r);
+      }
+      print "";
+    }
+
+    print "".join(orderedResults);
+    print orderedResults.size().toString() + " example(s) in " +
+      result.duration.formatFixed(6) + "s | " +
+      nSkips.toString() + " skip(s) | " +
+      nFailures.toString() + " failure(s) | " +
+      nErrors.toString() + " error(s)";
+    print "";
+  }
+}
+

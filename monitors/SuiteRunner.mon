@@ -275,62 +275,8 @@ monitor SuiteRunner {
 
   /** @private */
   action endSuite() {
-    print "";
-    sequence<string> orderedResults := [];
-    integer id;
-    for id in suiteResult.examplesOrder {
-      orderedResults.append(suiteResult.getNode(id).getFormattedResult());
-    }
-    sequence<sequence<string> > temp := [];
-    sequence<string> r;
-    SpecNode node;
-
-    for node in suiteResult.getSkips() {
-      temp.append(node.reasons);
-    }
-    integer nSkips := temp.size();
-    if temp.size() > 0 then {
-      print "Skips: ";
-      for r in temp {
-        print "\n".join(r);
-      }
-      print "";
-    }
-    temp.clear();
-
-    for node in suiteResult.getFailures() {
-      temp.append(node.reasons);
-    }
-    integer nFailures := temp.size();
-    if temp.size() > 0 then {
-      print "Failures: ";
-      for r in temp {
-        print "\n".join(r);
-      }
-      print "";
-    }
-    temp.clear();
-
-    for node in suiteResult.getErrors() {
-      temp.append(node.reasons);
-    }
-    integer nErrors := temp.size();
-    if temp.size() > 0 then {
-      print "Errors: ";
-      for r in temp {
-        print "\n".join(r);
-      }
-      print "";
-    }
-
-    print "".join(orderedResults);
-    print orderedResults.size().toString() + " example(s) in " +
-      (time.getMicroTime() - beginTime).formatFixed(6) + "s | " +
-      nSkips.toString() + " skip(s) | " +
-      nFailures.toString() + " failure(s) | " +
-      nErrors.toString() + " error(s)";
-    print "";
-
+    suiteResult.duration := time.getMicroTime() - beginTime;
+    route suiteResult;
     die;
   }
 }
