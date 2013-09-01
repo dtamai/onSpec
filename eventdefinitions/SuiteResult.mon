@@ -5,9 +5,11 @@ package org.onspec;
  */
 event SuiteResult {
 
-  sequence<integer /*exampleId*/> examplesOrder;
+  wildcard sequence<integer /*exampleId*/> examplesOrder;
 
-  dictionary<integer /*nodeId*/, SpecNode> nodes;
+  wildcard dictionary<integer /*nodeId*/, SpecNode> nodes;
+
+  wildcard float duration;
 
   action getNode(integer nodeId) returns SpecNode {
     return nodes[nodeId];
