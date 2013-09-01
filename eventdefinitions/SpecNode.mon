@@ -24,7 +24,7 @@ event SpecNode {
 
   action addResult(string result, string reason) {
     results.append(result);
-    results.append(reason);
+    reasons.append(reason);
   }
 
   action getFormattedResult() returns string {
