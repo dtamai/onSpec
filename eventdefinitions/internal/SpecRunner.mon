@@ -83,13 +83,21 @@ event SpecRunner {
   }
 
   action storeExample(string text, integer id) {
+    sequence<integer> contextPath := surroundingContext.idSequenceToOpen.clone();
     if examplesMap.hasKey(text) then {
-      route SkippedExampleDescription(id, text, surroundingContext.idSequenceToOpen.clone(), "duplicate");
-    } else {
-      examples[id] := ExampleDescription(id, text, surroundingContext.idSequenceToOpen.clone(), buildLocalConfig());
-      examplesMap[text] := id;
-      route examples[id];
+      route SkippedExampleDescription(id, text, contextPath, "duplicate");
+      return;
     }
+
+    if surroundingContext.idSequenceToOpen.size() = 0 then {
+      examplesMap[text] := id;
+      route SkippedExampleDescription(id, text, contextPath, "no surrouning context");
+      return;
+    }
+
+    examples[id] := ExampleDescription(id, text, contextPath, buildLocalConfig());
+    examplesMap[text] := id;
+    route examples[id];
   }
 
   action getId() returns integer{

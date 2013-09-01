@@ -54,6 +54,9 @@ monitor onSpecSample {
         }
       }
     }
+    on Spec($.it("is out of context")) {
+      $.fail("should not execute");
+    }
 
     $.config("timeout:1.0");
     on Spec($.describe("The second example")) {
