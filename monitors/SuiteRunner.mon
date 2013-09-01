@@ -19,14 +19,6 @@ monitor SuiteRunner {
   /** @private */
   dictionary<integer /*id*/, ExampleDescription> examples := {};
   /** @private */
-  dictionary<integer, sequence<string> > failures := {};
-  /** @private */
-  dictionary<integer, sequence<string> > successes := {};
-  /** @private */
-  dictionary<integer, sequence<string> > skips := {};
-  /** @private */
-  dictionary<integer, sequence<string> > errors := {};
-  /** @private */
   SuiteResult suiteResult;
   /** @private */
   boolean isConfigured := false;
@@ -175,22 +167,22 @@ monitor SuiteRunner {
   }
 
   action registerFailure(integer id, string text) {
-    registerResult(id, SpecResult.FAILURE, failures, text);
+    registerResult(id, SpecResult.FAILURE, text);
   }
 
   action registerSuccess(integer id) {
-    registerResult(id, SpecResult.SUCCESS, successes, "");
+    registerResult(id, SpecResult.SUCCESS, "");
   }
 
   action registerSkip(integer id, string text) {
-    registerResult(id, SpecResult.SKIP, skips, text);
+    registerResult(id, SpecResult.SKIP, text);
   }
 
   action registerError(integer id, string text) {
-    registerResult(id, SpecResult.ERROR, errors, text);
+    registerResult(id, SpecResult.ERROR, text);
   }
 
-  action registerResult(integer id, string status, dictionary<integer, sequence<string> > bucket, string text) {
+  action registerResult(integer id, string status, string text) {
 
     if suiteResult.examplesOrder.indexOf(id) = -1 then {
       suiteResult.examplesOrder.append(id);
@@ -200,11 +192,6 @@ monitor SuiteRunner {
       SpecNode node := suiteResult.getNode(id);
       node.addResult(status, text);
     }
-
-    if not bucket.hasKey(id) then {
-      bucket[id] := new sequence<string>;
-    }
-    bucket[id].append(text);
   }
 
   /** @private */
@@ -294,43 +281,56 @@ monitor SuiteRunner {
     for id in suiteResult.examplesOrder {
       orderedResults.append(suiteResult.getNode(id).getFormattedResult());
     }
+    sequence<sequence<string> > temp := [];
+    sequence<string> r;
+    SpecNode node;
+
+    for node in suiteResult.getSkips() {
+      temp.append(node.reasons);
+    }
+    integer nSkips := temp.size();
+    if temp.size() > 0 then {
+      print "Skips: ";
+      for r in temp {
+        print "\n".join(r);
+      }
+      print "";
+    }
+    temp.clear();
+
+    for node in suiteResult.getFailures() {
+      temp.append(node.reasons);
+    }
+    integer nFailures := temp.size();
+    if temp.size() > 0 then {
+      print "Failures: ";
+      for r in temp {
+        print "\n".join(r);
+      }
+      print "";
+    }
+    temp.clear();
+
+    for node in suiteResult.getErrors() {
+      temp.append(node.reasons);
+    }
+    integer nErrors := temp.size();
+    if temp.size() > 0 then {
+      print "Errors: ";
+      for r in temp {
+        print "\n".join(r);
+      }
+      print "";
+    }
+
     print "".join(orderedResults);
     print orderedResults.size().toString() + " example(s) in " +
       (time.getMicroTime() - beginTime).formatFixed(6) + "s | " +
-      skips.size().toString() + " skip(s) | " +
-      failures.size().toString() + " failure(s) | " +
-      errors.size().toString() + " error(s)";
+      nSkips.toString() + " skip(s) | " +
+      nFailures.toString() + " failure(s) | " +
+      nErrors.toString() + " error(s)";
     print "";
 
-    sequence<sequence<string> > skips := [];
-    SpecNode node;
-    for node in suiteResult.getSkips() {
-      skips.append(node.reasons);
-    }
-
-    sequence<string> r;
-    if skips.size() > 0 then {
-      print "Skips: ";
-      for r in skips {
-        print "\n".join(r);
-      }
-      print "";
-    }
-    if failures.size() > 0 then {
-      print "Failures: ";
-      for r in failures.values() {
-        print "\n".join(r);
-      }
-      print "";
-    }
-    if errors.size() > 0 then {
-      print "Errors: ";
-      for r in errors.values() {
-        print "\n".join(r);
-      }
-      print "";
-    }
-    print suiteResult.toString();
     die;
   }
 }
