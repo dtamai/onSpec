@@ -1,0 +1,64 @@
+package org.onspec;
+
+/**
+ * Container for the results of a suite run
+ */
+event SuiteResult {
+
+  wildcard sequence<integer /*exampleId*/> examplesOrder;
+
+  wildcard dictionary<integer /*nodeId*/, SpecNode> nodes;
+
+  wildcard float duration;
+
+  action getNode(integer nodeId) returns SpecNode {
+    return nodes[nodeId];
+  }
+
+  action hasNode(integer nodeId) returns boolean {
+    return nodes.hasKey(nodeId);
+  }
+
+  action getNodes() returns sequence<SpecNode> {
+    return nodes.values();
+  }
+
+  action getSkips() returns sequence<SpecNode> {
+    return filterIn(filterInSkips);
+  }
+
+  action getFailures() returns sequence<SpecNode> {
+    return filterIn(filterInFailures);
+  }
+
+  action getErrors() returns sequence<SpecNode> {
+    return filterIn(filterInErrors);
+  }
+
+  action filterIn(action<SpecNode> returns boolean filter) returns sequence<SpecNode> {
+    sequence<SpecNode> result := [];
+    SpecNode node;
+    for node in getNodes() {
+      if filter(node) then {
+        result.append(node);
+      }
+    }
+
+    return result;
+  }
+
+  action filterInSkips(SpecNode node) returns boolean {
+    return node.results.indexOf(SpecResult.SKIP) > -1;
+  }
+
+  action filterInFailures(SpecNode node) returns boolean {
+    return node.results.indexOf(SpecResult.FAILURE) > -1;
+  }
+
+  action filterInErrors(SpecNode node) returns boolean {
+    return node.results.indexOf(SpecResult.ERROR) > -1;
+  }
+
+  // TODO: enable nodes' traversal
+}
+

@@ -41,6 +41,14 @@ event ContextDescription {
   wildcard string text;
   wildcard sequence<integer> idSequenceToOpen;
   wildcard org.onspec.SuiteConfiguration config;
+
+  action getParentId() returns integer {
+    if idSequenceToOpen.size() = 0 then {
+      return 0;
+    } else {
+      return idSequenceToOpen[idSequenceToOpen.size() - 1];
+    }
+  }
 }
 
 /** @private */
@@ -49,6 +57,29 @@ event ExampleDescription {
   wildcard string text;
   wildcard sequence<integer> parentContextsId;
   wildcard org.onspec.SuiteConfiguration config;
+
+  action getParentId() returns integer {
+    if parentContextsId.size() = 0 then {
+      return 0;
+    } else {
+      return parentContextsId[parentContextsId.size() - 1];
+    }
+  }
+}
+
+/** @private */
+event SkippedExampleDescription {
+  wildcard integer id;
+  wildcard string text;
+  wildcard sequence<integer> parentContextsId;
+  wildcard string reason;
+}
+
+/** @private */
+event IgnoredExampleDescription {
+  wildcard integer id;
+  wildcard string text;
+  wildcard sequence<integer> parentContextsId;
 }
 
 /** @private */

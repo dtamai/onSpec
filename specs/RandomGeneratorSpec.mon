@@ -26,27 +26,27 @@ monitor RandomGeneratorSpec {
         IntegerValue(r1.next()).mustBe(r2.next());
         _.done();
       }
-    }
 
-    on Spec(_.it("initializes itself if required")) {
-      RandomGenerator r := new RandomGenerator;
+      on Spec(_.it("initializes itself if required")) {
+        RandomGenerator r := new RandomGenerator;
 
-      integer i := r.next();
+        integer i := r.next();
 
-      BooleanValue(r.initialized).mustBe(true);
-      _.done();
-    }
+        BooleanValue(r.initialized).mustBe(true);
+        _.done();
+      }
 
-    on Spec(_.it("provides random numbers up to a maximum (non inclusive)")) {
-      // not exaustive test, just documentation
-      RandomGenerator r := new RandomGenerator;
-      r.init(SEED);
-      integer max := 3;
+      on Spec(_.it("provides random numbers up to a maximum (non inclusive)")) {
+        // not exaustive test, just documentation
+        RandomGenerator r := new RandomGenerator;
+        r.init(SEED);
+        integer max := 3;
 
-      integer rand := r.upTo(max);
+        integer rand := r.upTo(max);
 
-      BooleanValue(rand < max).mustBe(true);
-      _.done();
+        BooleanValue(rand < max).mustBe(true);
+        _.done();
+      }
     }
   }
 }

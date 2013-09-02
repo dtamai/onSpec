@@ -9,8 +9,16 @@
 		<mkdir dir="${build.dir}"/>
 	</target>
 
-	<target name="package" depends="init">
-		<engine-package output="${build.dir}/${ant.project.name}.cdp" manifest="manifest.txt"/>
+	<target name="version">
+		<loadfile property="version.file" srcFile="eventdefinitions/onSpec.mon"/>
+		<propertyregex property="version"
+			input="${version.file}"
+			regexp="version := &quot;([^&quot;]*)"
+			select="\1"/>
+	</target>
+
+	<target name="package" depends="init, version">
+		<engine-package output="${build.dir}/${ant.project.name}-${version}.cdp" manifest="manifest.txt"/>
 	</target>
 
 	<target name="clean">

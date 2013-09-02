@@ -54,6 +54,9 @@ monitor onSpecSample {
         }
       }
     }
+    on Spec($.it("is out of context")) {
+      $.fail("should not execute");
+    }
 
     $.config("timeout:1.0");
     on Spec($.describe("The second example")) {
@@ -73,6 +76,20 @@ monitor onSpecSample {
       on Spec($.it("has also has something to say")) {
         route SampleResponse(". . .");
         $.pass();
+      }
+    }
+
+    on Spec($.describe("The fourth example")) {
+      on Spec($.ignore("is ignored")) {
+        $.fail("this should not fail");
+      }
+    }
+
+    on Spec($.describe("The fifth example")) {
+      on Spec($.it("has some weird cases")) {
+        on Spec($.describe("this is a bad context")) {}
+        on Spec($.it("is just nonsense")) {}
+        $.done();
       }
     }
   }
@@ -104,8 +121,22 @@ monitor onSpecSample2 {
       }
 
       on Spec(_.it("gives many chances for failure")) {
+        _.skip();
         _.fail("failed once");
         _.fail("failed again");
+        _.pass();
+      }
+
+      on Spec(_.describe("with repeated examples")) {
+        // a repeated example being two exmples with the same text in the
+        // same file
+        on Spec(_.it("skips the second to run")) {
+          _.done();
+        }
+
+        on Spec(_.it("skips the second to run")) {
+          _.done();
+        }
       }
     }
   }
