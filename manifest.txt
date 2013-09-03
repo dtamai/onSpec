@@ -1,3 +1,6 @@
+eventdefinitions/onSpec.mon
+eventdefinitions/SpecNode.mon
+eventdefinitions/SuiteResult.mon
 eventdefinitions/SuiteConfiguration.mon
 eventdefinitions/internal/Events.mon
 eventdefinitions/Events.mon
@@ -12,3 +15,5 @@ eventdefinitions/expectations/FloatValue.mon
 eventdefinitions/expectations/IntegerValue.mon
 eventdefinitions/expectations/StringValue.mon
 monitors/SuiteRunner.mon
+monitors/ConsoleReporter.mon
+
