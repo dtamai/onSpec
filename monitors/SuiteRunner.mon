@@ -179,7 +179,7 @@ monitor SuiteRunner {
   sequence<integer> pendingExamplesId;
   action runExamples() {
     pendingExamplesId := defineExamplesOrder(examples.keys());
-    suiteResult.examplesOrder.appendSequence(pendingExamplesId.clone());
+    suiteResult.defineExamplesOrder(pendingExamplesId);
     runFirstExample();
   }
 

@@ -59,6 +59,10 @@ event SuiteResult {
     return node.results.indexOf(SpecResult.ERROR) > -1;
   }
 
+  action defineExamplesOrder(sequence<integer> order) {
+    examplesOrder.appendSequence(order.clone());
+  }
+
   action addNode(SpecNode node, integer parentId) {
     nodes[node.id] := node;
     nodes[parentId].appendChildren(node.id);
@@ -81,6 +85,9 @@ event SuiteResult {
   }
 
   action registerResult(integer id, string status, string text) {
+    // Examples that are ignored or are unreacheable won't be listed
+    // in the complete examples from the SuiteRunner, for completeness,
+    // appending them to that list
     if examplesOrder.indexOf(id) = -1 then {
       examplesOrder.append(id);
     }
