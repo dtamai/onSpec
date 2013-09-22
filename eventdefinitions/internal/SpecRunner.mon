@@ -65,7 +65,7 @@ event SpecRunner {
 
   action disableDiscovery() {
     repeater := new SpecRunnerRepeater;
-    repeater.init(contextsMap, examplesMap, getId);
+    repeater.init(specId, contextsMap, examplesMap, getId);
 
     addContext := repeater.addContext;
     addSpec := repeater.addSpec;

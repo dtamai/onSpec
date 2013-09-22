@@ -7,6 +7,7 @@ event SpecRunnerRepeater {
   action<> returns integer getId;
 
   action init(
+    integer specId
     dictionary<string, integer> contextsMap,
     dictionary<string, integer> examplesMap,
     action<> returns integer idGenerator
