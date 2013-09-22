@@ -17,6 +17,7 @@ event SpecNode {
   wildcard sequence<integer> childrenId;
 
   // valid if is an example (isTerminal = true)
+  wildcard sequence<integer> ancestorsId;
   wildcard sequence<string> results;
   wildcard sequence<string> reasons;
 

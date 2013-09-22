@@ -121,20 +121,21 @@ monitor SuiteRunner {
   }
 
   action registerExample(ExampleDescription ex) {
-    suiteResult.addNode(newExampleNode(ex.id, ex.text), ex.getParentId());
+    suiteResult.addNode(newExampleNode(ex.id, ex.text, ex.parentContextsId), ex.getParentId());
   }
 
   action registerSkippedExample(SkippedExampleDescription skip) {
-    suiteResult.nodes[skip.id] := newExampleNode(skip.id, skip.text);
+    suiteResult.nodes[skip.id] := newExampleNode(skip.id, skip.text, skip.parentContextsId);
     suiteResult.registerSkip(skip.id,
         "'" + " ".join(contextsToTexts(skip.parentContextsId)) + " " + skip.text + "' " + skip.reason);
   }
 
-  action newExampleNode(integer id, string text) returns SpecNode {
+  action newExampleNode(integer id, string text, sequence<integer> ancestorsId) returns SpecNode {
     SpecNode node := new SpecNode;
     node.id := id;
     node.text := text;
     node.isTerminal := true;
+    node.ancestorsId := ancestorsId;
     return node;
   }
 
