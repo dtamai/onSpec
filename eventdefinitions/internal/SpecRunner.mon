@@ -36,7 +36,7 @@ event SpecRunner {
 
   action prepareDiscovery() {
     recorder := new SpecRunnerRecorder;
-    recorder.init(specId, contextsMap, examplesMap, examples, getId);
+    recorder.init(specId, contextsMap, examplesMap, getId);
 
     addContext := recorder.addContext;
     addSpec := recorder.addSpec;
@@ -75,7 +75,6 @@ event SpecRunner {
 
   action rewindSpecMonitor() {
     specsMonitorEntryPoint();
-    cursor := 0;
   }
 
   action doSpawn() {
@@ -83,31 +82,29 @@ event SpecRunner {
   }
 
   action waitToRunExamples() {
-    integer id;
-    for id in examples.keys() {
-      on RunExample(id) {
-        cursor := id;
-        spawn runExample(id);
+    ExampleDescription example;
+    for example in recorder.getExamples() {
+      on RunExample(example.id) {
+        spawn runExample(example);
       }
     }
   }
 
-  action runExample(integer exampleId) {
+  action runExample(ExampleDescription example) {
     rewindSpecMonitor();
-    ExampleDescription example := examples[exampleId];
 
     integer ctxId;
-    for ctxId in examples[exampleId].parentContextsId {
+    for ctxId in example.parentContextsId {
       route Spec(ctxId);
     }
 
     route Before();
     on completed Before() {
-      route Spec(exampleId);
-      on wait (example.config.getTimeout()) and not SpecDone(exampleId) {
+      route Spec(example.id);
+      on wait (example.config.getTimeout()) and not SpecDone(example.id) {
         org.onspec.SpecReporter().fail("timeout");
       }
-      on SpecDone(exampleId) {
+      on SpecDone(example.id) {
         route After();
         on completed After() {
           die;
@@ -130,10 +127,6 @@ event SpecRunner {
   // This variable is not relevant for the monitor that is spawned to run
   // examples
   integer cursor;
-
-  // Holds all examples, it is populated in the first run and must be
-  // read-only after discovery is done
-  dictionary<integer /*id*/, ExampleDescription> examples;
 
   // Repeat/Noop implementation
   SpecRunnerRepeater repeater;

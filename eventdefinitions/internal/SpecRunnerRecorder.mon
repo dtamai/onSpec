@@ -10,7 +10,6 @@ event SpecRunnerRecorder {
     integer specId,
     dictionary<string, integer> contextsMap,
     dictionary<string, integer> examplesMap,
-    dictionary<integer, ExampleDescription> examples,
     action<> returns integer idGenerator
   ) {
     ContextDescription rootContext := new ContextDescription;
@@ -19,7 +18,6 @@ event SpecRunnerRecorder {
 
     self.contextsMap := contextsMap;
     self.examplesMap := examplesMap;
-    self.examples := examples;
     self.getId := idGenerator;
   }
 
@@ -51,6 +49,15 @@ event SpecRunnerRecorder {
     nextConfig := nextConfig.fromString(configString);
   }
 
+  action updateCurrentContext(integer id) {
+    surroundingContext := contexts[id];
+    surroundingContext.idSequenceToOpen.append(id);
+  }
+
+  action getExamples() returns sequence<ExampleDescription> {
+    return examples.values();
+  }
+
   // privates
   action storeContext(string text, integer id) {
     contexts[id] := ContextDescription(
@@ -61,11 +68,6 @@ event SpecRunnerRecorder {
     );
     contextsMap[text] := id;
     route contexts[id];
-  }
-
-  action updateCurrentContext(integer id) {
-    surroundingContext := contexts[id];
-    surroundingContext.idSequenceToOpen.append(id);
   }
 
   action storeExample(string text, integer id) {
