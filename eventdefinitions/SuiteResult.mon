@@ -64,6 +64,22 @@ event SuiteResult {
     nodes[parentId].appendChildren(node.id);
   }
 
+  action registerFailure(integer id, string text) {
+    registerResult(id, SpecResult.FAILURE, text);
+  }
+
+  action registerSuccess(integer id) {
+    registerResult(id, SpecResult.SUCCESS, "");
+  }
+
+  action registerSkip(integer id, string text) {
+    registerResult(id, SpecResult.SKIP, text);
+  }
+
+  action registerError(integer id, string text) {
+    registerResult(id, SpecResult.ERROR, text);
+  }
+
   action registerResult(integer id, string status, string text) {
     if examplesOrder.indexOf(id) = -1 then {
       examplesOrder.append(id);

@@ -98,24 +98,24 @@ monitor SuiteRunner {
 
     Failure f;
     on all Failure():f {
-      registerFailure(f.id,
+      suiteResult.registerFailure(f.id,
           "'" + expandContextString(f.id) + "' failed: " + f.reason);
     }
 
     Success su;
     on all Success():su {
-      registerSuccess(su.id);
+      suiteResult.registerSuccess(su.id);
     }
 
     Skip s;
     on all Skip():s {
-      registerSkip(s.id,
+      suiteResult.registerSkip(s.id,
           "'" + expandContextString(s.id) + "' skipped");
     }
 
     Error e;
     on all Error():e {
-      registerError(e.id,
+      suiteResult.registerError(e.id,
           "'" + expandContextString(e.id) + "' ERROR: " + e.reason);
     }
 
@@ -131,13 +131,13 @@ monitor SuiteRunner {
 
   action registerSkippedExample(SkippedExampleDescription skip) {
     suiteResult.nodes[skip.id] := newExampleNode(skip.id, skip.text);
-    registerError(skip.id,
+    suiteResult.registerError(skip.id,
         "'" + " ".join(contextsToTexts(skip.parentContextsId)) + " " + skip.text + "' " + skip.reason);
   }
 
   action registerIgnoredExample(IgnoredExampleDescription ignore) {
     suiteResult.nodes[ignore.id] := newExampleNode(ignore.id, ignore.text);
-    registerSkip(ignore.id,
+    suiteResult.registerSkip(ignore.id,
         "'" + " ".join(contextsToTexts(ignore.parentContextsId)) + " " + ignore.text + "' ignored");
   }
 
@@ -154,22 +154,6 @@ monitor SuiteRunner {
     node.id := id;
     node.text := text;
     return node;
-  }
-
-  action registerFailure(integer id, string text) {
-    suiteResult.registerResult(id, SpecResult.FAILURE, text);
-  }
-
-  action registerSuccess(integer id) {
-    suiteResult.registerResult(id, SpecResult.SUCCESS, "");
-  }
-
-  action registerSkip(integer id, string text) {
-    suiteResult.registerResult(id, SpecResult.SKIP, text);
-  }
-
-  action registerError(integer id, string text) {
-    suiteResult.registerResult(id, SpecResult.ERROR, text);
   }
 
   action handleConfiguration() {
