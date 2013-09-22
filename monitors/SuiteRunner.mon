@@ -93,8 +93,7 @@ monitor SuiteRunner {
 
     Failure f;
     on all Failure():f {
-      suiteResult.registerFailure(f.id,
-          "'" + expandContextString(f.id) + "' failed: " + f.reason);
+      suiteResult.registerFailure(f.id, f.reason);
     }
 
     Success su;
@@ -104,14 +103,12 @@ monitor SuiteRunner {
 
     Skip s;
     on all Skip():s {
-      suiteResult.registerSkip(s.id,
-          "'" + expandContextString(s.id) + "' skipped");
+      suiteResult.registerSkip(s.id, "Suite#skip");
     }
 
     Error e;
     on all Error():e {
-      suiteResult.registerError(e.id,
-          "'" + expandContextString(e.id) + "' ERROR: " + e.reason);
+      suiteResult.registerError(e.id, e.reason);
     }
 
   }
@@ -126,8 +123,7 @@ monitor SuiteRunner {
 
   action registerSkippedExample(SkippedExampleDescription skip) {
     suiteResult.nodes[skip.id] := newExampleNode(skip.id, skip.text, skip.parentContextsId);
-    suiteResult.registerSkip(skip.id,
-        "'" + " ".join(contextsToTexts(skip.parentContextsId)) + " " + skip.text + "' " + skip.reason);
+    suiteResult.registerSkip(skip.id, skip.reason);
   }
 
   action newExampleNode(integer id, string text, sequence<integer> ancestorsId) returns SpecNode {
@@ -199,25 +195,6 @@ monitor SuiteRunner {
     } else {
       return list;
     }
-  }
-
-  action expandContextString(integer exampleId) returns string {
-    return " ".join(getContextDescriptionList(exampleId));
-  }
-
-  action getContextDescriptionList(integer exampleId) returns sequence<string> {
-    sequence<string> ctxList := contextsToTexts(examples[exampleId].parentContextsId);
-    ctxList.append(examples[exampleId].text);
-    return ctxList;
-  }
-
-  action contextsToTexts(sequence<integer> ctxIds) returns sequence<string> {
-    sequence<string> text := [];
-    integer ctxId;
-    for ctxId in ctxIds {
-      text.append(contexts[ctxId].text);
-    }
-    return text;
   }
 
   action endSuite() {

@@ -69,7 +69,8 @@ event SuiteResult {
   }
 
   action registerFailure(integer id, string text) {
-    registerResult(id, SpecResult.FAILURE, text);
+    string t := "'" + expandContextString(id) + "' failed: " + text;
+    registerResult(id, SpecResult.FAILURE, t);
   }
 
   action registerSuccess(integer id) {
@@ -77,11 +78,13 @@ event SuiteResult {
   }
 
   action registerSkip(integer id, string text) {
-    registerResult(id, SpecResult.SKIP, text);
+    string t := "'" + expandContextString(id) + "' skipped: " + text;
+    registerResult(id, SpecResult.SKIP, t);
   }
 
   action registerError(integer id, string text) {
-    registerResult(id, SpecResult.ERROR, text);
+    string t := "'" + expandContextString(id) + "' ERROR: " + text;
+    registerResult(id, SpecResult.ERROR, t);
   }
 
   action registerResult(integer id, string status, string text) {
@@ -97,6 +100,30 @@ event SuiteResult {
       node.addResult(status, text);
     }
   }
+
+  /*
+   * Actions to keep the results the same while improving how the results
+   * are stored
+   */
+  action expandContextString(integer exampleId) returns string {
+    return " ".join(getContextDescriptionList(exampleId));
+  }
+
+  action getContextDescriptionList(integer exampleId) returns sequence<string> {
+    sequence<string> ctxList := contextsToTexts(nodes[exampleId].ancestorsId);
+    ctxList.append(nodes[exampleId].text);
+    return ctxList;
+  }
+
+  action contextsToTexts(sequence<integer> ctxIds) returns sequence<string> {
+    sequence<string> text := [];
+    integer ctxId;
+    for ctxId in ctxIds {
+      text.append(nodes[ctxId].text);
+    }
+    return text;
+  }
+
 
   // TODO: enable nodes' traversal
 }
