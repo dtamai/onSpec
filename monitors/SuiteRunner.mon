@@ -122,13 +122,11 @@ monitor SuiteRunner {
   }
 
   action registerContext(ContextDescription ctx) {
-    suiteResult.nodes[ctx.id] := newContextNode(ctx.id, ctx.text);
-    suiteResult.nodes[ctx.getParentId()].appendChildren(ctx.id);
+    suiteResult.addNode(newContextNode(ctx.id, ctx.text), ctx.getParentId());
   }
 
   action registerExample(ExampleDescription ex) {
-    suiteResult.nodes[ex.id] := newExampleNode(ex.id, ex.text);
-    suiteResult.nodes[ex.getParentId()].appendChildren(ex.id);
+    suiteResult.addNode(newExampleNode(ex.id, ex.text), ex.getParentId());
   }
 
   action registerSkippedExample(SkippedExampleDescription skip) {
@@ -159,31 +157,19 @@ monitor SuiteRunner {
   }
 
   action registerFailure(integer id, string text) {
-    registerResult(id, SpecResult.FAILURE, text);
+    suiteResult.registerResult(id, SpecResult.FAILURE, text);
   }
 
   action registerSuccess(integer id) {
-    registerResult(id, SpecResult.SUCCESS, "");
+    suiteResult.registerResult(id, SpecResult.SUCCESS, "");
   }
 
   action registerSkip(integer id, string text) {
-    registerResult(id, SpecResult.SKIP, text);
+    suiteResult.registerResult(id, SpecResult.SKIP, text);
   }
 
   action registerError(integer id, string text) {
-    registerResult(id, SpecResult.ERROR, text);
-  }
-
-  action registerResult(integer id, string status, string text) {
-
-    if suiteResult.examplesOrder.indexOf(id) = -1 then {
-      suiteResult.examplesOrder.append(id);
-    }
-
-    if suiteResult.hasNode(id) then {
-      SpecNode node := suiteResult.getNode(id);
-      node.addResult(status, text);
-    }
+    suiteResult.registerResult(id, SpecResult.ERROR, text);
   }
 
   action handleConfiguration() {

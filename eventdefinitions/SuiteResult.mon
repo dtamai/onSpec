@@ -59,6 +59,22 @@ event SuiteResult {
     return node.results.indexOf(SpecResult.ERROR) > -1;
   }
 
+  action addNode(SpecNode node, integer parentId) {
+    nodes[node.id] := node;
+    nodes[parentId].appendChildren(node.id);
+  }
+
+  action registerResult(integer id, string status, string text) {
+    if examplesOrder.indexOf(id) = -1 then {
+      examplesOrder.append(id);
+    }
+
+    if hasNode(id) then {
+      SpecNode node := getNode(id);
+      node.addResult(status, text);
+    }
+  }
+
   // TODO: enable nodes' traversal
 }
 
