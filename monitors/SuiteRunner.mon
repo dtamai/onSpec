@@ -7,29 +7,22 @@ using org.onspec.SpecNode;
 using org.onspec.SpecResult;
 
 /**
+ * @private
  * Monitor that manages running specs.
  * @listens NewSuite Runs a new spec suite
  * @listens SuiteConfiguration Configure (optional) how the suite runs
  */
 monitor SuiteRunner {
-  /** @private */
   sequence<integer> specs := [];
-  /** @private */
   dictionary<integer /*id*/, ContextDescription> contexts := {};
-  /** @private */
   dictionary<integer /*id*/, ExampleDescription> examples := {};
-  /** @private */
   SuiteResult suiteResult;
-  /** @private */
   boolean isConfigured := false;
-  /** @private */
   SuiteConfiguration config;
 
   import "TimeFormatPlugin" as time;
-  /** @private */
   float beginTime;
 
-  /** @private */
   action onload() {
     on all SuiteConfiguration():config {
       isConfigured := true;
@@ -49,7 +42,6 @@ monitor SuiteRunner {
     }
   }
 
-  /** @private */
   action handleNewSuite() {
     suiteResult := new SuiteResult;
     suiteResult.nodes[0] := newContextNode(0, "");
@@ -194,7 +186,6 @@ monitor SuiteRunner {
     }
   }
 
-  /** @private */
   action handleConfiguration() {
     config := config.merge(config.fromString(config.configString));
     if config.shouldRandomize() then {
@@ -210,7 +201,6 @@ monitor SuiteRunner {
     }
   }
 
-  /** @private */
   action useDefaultConfiguration() {
     route new SuiteConfiguration;
   }
@@ -251,19 +241,16 @@ monitor SuiteRunner {
     }
   }
 
-  /** @private */
   action expandContextString(integer exampleId) returns string {
     return " ".join(getContextDescriptionList(exampleId));
   }
 
-  /** @private */
   action getContextDescriptionList(integer exampleId) returns sequence<string> {
     sequence<string> ctxList := contextsToTexts(examples[exampleId].parentContextsId);
     ctxList.append(examples[exampleId].text);
     return ctxList;
   }
 
-  /** @private */
   action contextsToTexts(sequence<integer> ctxIds) returns sequence<string> {
     sequence<string> text := [];
     integer ctxId;
@@ -273,7 +260,6 @@ monitor SuiteRunner {
     return text;
   }
 
-  /** @private */
   action endSuite() {
     suiteResult.duration := time.getMicroTime() - beginTime;
     route suiteResult;
@@ -281,6 +267,7 @@ monitor SuiteRunner {
   }
 }
 
+/** @private */
 monitor ExampleResultListener {
   action onload() {
     RunExample ex;
