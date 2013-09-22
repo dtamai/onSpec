@@ -72,11 +72,6 @@ monitor SuiteRunner {
       registerSkippedExample(skip);
     }
 
-    IgnoredExampleDescription ignore;
-    on all IgnoredExampleDescription():ignore {
-      registerIgnoredExample(ignore);
-    }
-
     on completed SpecDiscover() {
       disc.quit();
 
@@ -131,14 +126,8 @@ monitor SuiteRunner {
 
   action registerSkippedExample(SkippedExampleDescription skip) {
     suiteResult.nodes[skip.id] := newExampleNode(skip.id, skip.text);
-    suiteResult.registerError(skip.id,
+    suiteResult.registerSkip(skip.id,
         "'" + " ".join(contextsToTexts(skip.parentContextsId)) + " " + skip.text + "' " + skip.reason);
-  }
-
-  action registerIgnoredExample(IgnoredExampleDescription ignore) {
-    suiteResult.nodes[ignore.id] := newExampleNode(ignore.id, ignore.text);
-    suiteResult.registerSkip(ignore.id,
-        "'" + " ".join(contextsToTexts(ignore.parentContextsId)) + " " + ignore.text + "' ignored");
   }
 
   action newExampleNode(integer id, string text) returns SpecNode {
