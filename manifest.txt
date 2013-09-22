@@ -7,6 +7,8 @@ eventdefinitions/Events.mon
 eventdefinitions/SpecReporter.mon
 eventdefinitions/internal/RandomGenerator.mon
 eventdefinitions/internal/Shuffler.mon
+eventdefinitions/internal/SpecRunnerRecorder.mon
+eventdefinitions/internal/SpecRunnerRepeater.mon
 eventdefinitions/internal/SpecRunner.mon
 eventdefinitions/Suite.mon
 eventdefinitions/expectations/BooleanValue.mon
