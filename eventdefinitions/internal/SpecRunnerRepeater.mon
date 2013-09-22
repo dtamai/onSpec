@@ -1,0 +1,46 @@
+package org.onspec.internal;
+
+event SpecRunnerRepeater {
+
+  dictionary<string, integer> contextsMap;
+  dictionary<string, integer> examplesMap;
+  action<> returns integer getId;
+
+  action init(
+    dictionary<string, integer> contextsMap,
+    dictionary<string, integer> examplesMap,
+    action<> returns integer idGenerator
+  ) {
+    self.contextsMap := contextsMap;
+    self.examplesMap := examplesMap;
+    self.getId := idGenerator;
+  }
+
+  action addContext(string text) returns integer {
+    if contextsMap.hasKey(text) then {
+      return contextsMap[text];
+    } else {
+      route SkippedExampleDescription(getId(), text, new sequence<integer>, "unreacheable context");
+      return -1;
+    }
+  }
+
+  action addSpec(string text) returns integer {
+    if examplesMap.hasKey(text) then {
+      return examplesMap[text];
+    } else {
+      route SkippedExampleDescription(getId(), text, new sequence<integer>, "unreacheable example");
+      return -1;
+    }
+  }
+
+  action ignoreSpec(string text) returns integer {
+    return -1;
+  }
+
+  action addConfig(string config) {
+  }
+
+  chunk __deadWeight;
+}
+

@@ -8,10 +8,12 @@ using org.onspec.SuiteConfiguration;
 /** @private */
 event SpecRunner {
 
+  // interface ==============================
   action<string> returns integer addContext;
   action<string> returns integer addSpec;
   action<string> returns integer ignoreSpec;
   action<string> addConfig;
+  // =========================================
 
   action run(action<> runnable, integer specId, SuiteConfiguration config) {
     self.specId := specId;
@@ -45,35 +47,10 @@ event SpecRunner {
     nextConfig := nextConfig.fromString(configString);
   }
 
-  action repeatContextsId(string text) returns integer {
-    if contextsMap.hasKey(text) then {
-      return contextsMap[text];
-    } else {
-      route SkippedExampleDescription(getId(), text, new sequence<integer>, "unreacheable context");
-      return -1;
-    }
-  }
-
-  action repeatExamplesId(string text) returns integer {
-    if examplesMap.hasKey(text) then {
-      return examplesMap[text];
-    } else {
-      route SkippedExampleDescription(getId(), text, new sequence<integer>, "unreacheable example");
-      return -1;
-    }
-  }
-
   action registerIgnoredExample(string text) returns integer {
     integer id := getId();
     route IgnoredExampleDescription(id, text, surroundingContext.idSequenceToOpen.clone());
     return id;
-  }
-
-  action noopIgnore(string text) returns integer {
-    return -1;
-  }
-
-  action noopConfig(string configString) {
   }
 
   action storeContext(string text, integer id) {
@@ -148,10 +125,13 @@ event SpecRunner {
   }
 
   action disableDiscovery() {
-    addContext := repeatContextsId;
-    addSpec := repeatExamplesId;
-    addConfig := noopConfig;
-    ignoreSpec := noopIgnore;
+    repeater := new SpecRunnerRepeater;
+    repeater.init(contextsMap, examplesMap, getId);
+
+    addContext := repeater.addContext;
+    addSpec := repeater.addSpec;
+    addConfig := repeater.addConfig;
+    ignoreSpec := repeater.ignoreSpec;
   }
 
   action rewindSpecMonitor() {
@@ -237,6 +217,9 @@ event SpecRunner {
 
   // Cache configuration
   SuiteConfiguration nextConfig;
+
+  // Repeat/Noop implementation
+  SpecRunnerRepeater repeater;
 
   chunk __deadWeight;
 }
