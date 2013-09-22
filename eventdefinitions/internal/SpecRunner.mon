@@ -18,90 +18,37 @@ event SpecRunner {
   action run(action<> runnable, integer specId, SuiteConfiguration config) {
     self.specId := specId;
     specsMonitorEntryPoint := runnable;
-    self.config := config;
+    recorder.globalConfig := config;
     discoverAllExamples();
   }
 
 
   // privates
-
-  action discoverContext(string text) returns integer {
-    integer id := getId();
-    storeContext(text, id);
-    clearConfig();
-
-    pendingContextsId.append(id);
-
-    return id;
-  }
-
-  action discoverExample(string text) returns integer {
-    integer id := getId();
-    storeExample(text, id);
-    clearConfig();
-
-    return id;
-  }
-
-  action configure(string configString) {
-    nextConfig := nextConfig.fromString(configString);
-  }
-
-  action registerIgnoredExample(string text) returns integer {
-    integer id := getId();
-    route IgnoredExampleDescription(id, text, surroundingContext.idSequenceToOpen.clone());
-    return id;
-  }
-
-  action storeContext(string text, integer id) {
-    contexts[id] := ContextDescription(id, text, surroundingContext.idSequenceToOpen.clone(), buildLocalConfig());
-    contextsMap[text] := id;
-    route contexts[id];
-  }
-
-  action storeExample(string text, integer id) {
-    sequence<integer> contextPath := surroundingContext.idSequenceToOpen.clone();
-    if examplesMap.hasKey(text) then {
-      route SkippedExampleDescription(id, text, contextPath, "duplicate");
-      return;
-    }
-
-    if surroundingContext.idSequenceToOpen.size() = 0 then {
-      examplesMap[text] := id;
-      route SkippedExampleDescription(id, text, contextPath, "no surrouning context");
-      return;
-    }
-
-    examples[id] := ExampleDescription(id, text, contextPath, buildLocalConfig());
-    examplesMap[text] := id;
-    route examples[id];
-  }
-
   action getId() returns integer{
     return integer.getUnique();
   }
 
   action discoverAllExamples() {
-    ContextDescription rootContext := new ContextDescription;
-    rootContext.id := self.specId;
-
-    surroundingContext := rootContext;
     prepareDiscovery();
     rewindSpecMonitor();
     openContextsForDiscovery();
   }
 
   action prepareDiscovery() {
-    addContext := discoverContext;
-    addSpec := discoverExample;
-    addConfig := configure;
-    ignoreSpec := registerIgnoredExample;
+    recorder := new SpecRunnerRecorder;
+    recorder.init(specId, contextsMap, examplesMap, examples, getId);
+
+    addContext := recorder.addContext;
+    addSpec := recorder.addSpec;
+    addConfig := recorder.addConfig;
+    ignoreSpec := recorder.ignoreSpec;
   }
 
   action openContextsForDiscovery() {
+    sequence<integer> pendingContextsId := recorder.pendingContextsId;
     if pendingContextsId.size() > 0 then {
       cursor := pendingContextsId[0];
-      updateCurrentContext(cursor);
+      recorder.updateCurrentContext(cursor);
 
       route Spec(cursor);
       on completed Spec(cursor) {
@@ -114,14 +61,6 @@ event SpecRunner {
       route SpecReady(self.specId);
       die;
     }
-  }
-
-  action buildLocalConfig() returns SuiteConfiguration {
-    return config.merge(surroundingContext.config).merge(nextConfig);
-  }
-
-  action clearConfig() {
-    nextConfig := new SuiteConfiguration;
   }
 
   action disableDiscovery() {
@@ -177,11 +116,6 @@ event SpecRunner {
     }
   }
 
-  action updateCurrentContext(integer id) {
-    surroundingContext := contexts[id];
-    surroundingContext.idSequenceToOpen.append(id);
-  }
-
   // Identifies the client monitor
   integer specId;
 
@@ -197,29 +131,15 @@ event SpecRunner {
   // examples
   integer cursor;
 
-  // Used while discovering examples, holds the _ContextDescription of the
-  // most internal context that is outside the current context.
-  ContextDescription surroundingContext;
-
-  // Used while discovering examples, holds the ids of contexts still closed
-  sequence<integer> pendingContextsId;
-
-  // Holds all contexts, its is populated in the first run and must be
-  // read-only after discovery is done
-  dictionary<integer /*id*/, ContextDescription> contexts;
-
   // Holds all examples, it is populated in the first run and must be
   // read-only after discovery is done
   dictionary<integer /*id*/, ExampleDescription> examples;
 
-  // Global suite configuration
-  SuiteConfiguration config;
-
-  // Cache configuration
-  SuiteConfiguration nextConfig;
-
   // Repeat/Noop implementation
   SpecRunnerRepeater repeater;
+
+  // Recorder implementation
+  SpecRunnerRecorder recorder;
 
   chunk __deadWeight;
 }
