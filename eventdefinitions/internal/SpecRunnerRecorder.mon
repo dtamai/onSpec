@@ -1,0 +1,109 @@
+package org.onspec.internal;
+
+event SpecRunnerRecorder {
+
+  dictionary<string, integer> contextsMap;
+  dictionary<string, integer> examplesMap;
+  action<> returns integer getId;
+
+  action init(
+    integer specId,
+    dictionary<string, integer> contextsMap,
+    dictionary<string, integer> examplesMap,
+    action<> returns integer idGenerator
+  ) {
+    ContextDescription rootContext := new ContextDescription;
+    rootContext.id := specId;
+    surroundingContext := rootContext;
+
+    self.contextsMap := contextsMap;
+    self.examplesMap := examplesMap;
+    self.getId := idGenerator;
+  }
+
+  action addContext(string text) returns integer {
+    integer id := getId();
+    storeContext(text, id);
+    clearConfig();
+
+    pendingContextsId.append(id);
+
+    return id;
+  }
+
+  action addSpec(string text) returns integer {
+    integer id := getId();
+    storeExample(text, id);
+    clearConfig();
+
+    return id;
+  }
+
+  action ignoreSpec(string text) returns integer {
+    integer id := getId();
+    route IgnoredExampleDescription(id, text, surroundingContext.idSequenceToOpen.clone());
+    return id;
+  }
+
+  action addConfig(string configString) {
+    nextConfig := nextConfig.fromString(configString);
+  }
+
+  action updateCurrentContext(integer id) {
+    surroundingContext := contexts[id];
+    surroundingContext.idSequenceToOpen.append(id);
+  }
+
+  action getExamples() returns sequence<ExampleDescription> {
+    return examples.values();
+  }
+
+  // privates
+  action storeContext(string text, integer id) {
+    contexts[id] := ContextDescription(
+      id,
+      text,
+      surroundingContext.idSequenceToOpen.clone(),
+      buildLocalConfig()
+    );
+    contextsMap[text] := id;
+    route contexts[id];
+  }
+
+  action storeExample(string text, integer id) {
+    sequence<integer> contextPath := surroundingContext.idSequenceToOpen.clone();
+    if examplesMap.hasKey(text) then {
+      route SkippedExampleDescription(id, text, contextPath, "duplicate");
+      return;
+    }
+
+    if surroundingContext.idSequenceToOpen.size() = 0 then {
+      examplesMap[text] := id;
+      route SkippedExampleDescription(id, text, contextPath, "no surrouning context");
+      return;
+    }
+
+    examples[id] := ExampleDescription(id, text, contextPath, buildLocalConfig());
+    examplesMap[text] := id;
+    route examples[id];
+  }
+
+  action buildLocalConfig() returns org.onspec.SuiteConfiguration {
+    return globalConfig.merge(surroundingContext.config).merge(nextConfig);
+  }
+
+  action clearConfig() {
+    nextConfig := new org.onspec.SuiteConfiguration;
+  }
+
+  dictionary<integer, ContextDescription> contexts;
+  dictionary<integer, ExampleDescription> examples;
+
+  sequence<integer> pendingContextsId;
+
+  ContextDescription surroundingContext;
+
+  org.onspec.SuiteConfiguration globalConfig;
+  org.onspec.SuiteConfiguration nextConfig;
+}
+
