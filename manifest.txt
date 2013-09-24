@@ -18,4 +18,5 @@ eventdefinitions/expectations/IntegerValue.mon
 eventdefinitions/expectations/StringValue.mon
 monitors/SuiteRunner.mon
 monitors/ConsoleReporter.mon
+monitors/ExampleResultListener.mon
 

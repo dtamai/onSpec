@@ -200,37 +200,4 @@ monitor SuiteRunner {
   }
 }
 
-/** @private */
-monitor ExampleResultListener {
-  action onload() {
-    RunExample ex;
-    on all RunExample():ex {
-      spawn listenResult(ex.id);
-    }
-  }
-
-  action listenResult(integer id) {
-    org.onspec.Skip s;
-    on org.onspec.Skip():s {
-      route Skip(id);
-    }
-
-    on org.onspec.Success() {
-      route Success(id);
-    }
-
-    org.onspec.Failure f;
-    on all org.onspec.Failure():f {
-      route Failure(id, f.reason);
-    }
-
-    on org.onspec.Done() {
-      enqueue SpecDone(id);
-    }
-
-    on SpecDone(id) {
-      die;
-    }
-  }
-}
 
