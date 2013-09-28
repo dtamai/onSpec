@@ -11,6 +11,8 @@ event SuiteResult {
 
   wildcard float duration;
 
+  wildcard SuiteConfiguration config;
+
   action getNode(integer nodeId) returns SpecNode {
     return nodes[nodeId];
   }

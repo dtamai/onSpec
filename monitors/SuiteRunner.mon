@@ -41,6 +41,7 @@ monitor SuiteRunner {
 
   action handleNewSuite() {
     suiteResult := new SuiteResult;
+    suiteResult.config := config;
     suiteResult.nodes[0] := newContextNode(0, "");
 
     route SpecDiscover();
@@ -140,16 +141,8 @@ monitor SuiteRunner {
   }
 
   action handleConfiguration() {
-    if config.shouldRandomize() then {
-      if not config.hasRandomSeed() then {
+    if config.shouldRandomize() and not config.hasRandomSeed() then {
         config.setRandomSeed((new RandomGenerator).next());
-        print "Random seed (use the config below to repeat examples order):";
-        print "," + SuiteConfiguration.randomSeedParamName + ":" + config.getRandomSeed().toString();
-      } else {
-        print "Using configured random seed: " + config.getRandomSeed().toString();
-      }
-    } else {
-      print "!! [WARN] Runing specs in order !!";
     }
   }
 
