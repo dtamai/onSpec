@@ -11,6 +11,8 @@ event SuiteResult {
 
   wildcard float duration;
 
+  wildcard SuiteConfiguration config;
+
   action getNode(integer nodeId) returns SpecNode {
     return nodes[nodeId];
   }
@@ -58,6 +60,72 @@ event SuiteResult {
   action filterInErrors(SpecNode node) returns boolean {
     return node.results.indexOf(SpecResult.ERROR) > -1;
   }
+
+  action defineExamplesOrder(sequence<integer> order) {
+    examplesOrder.appendSequence(order.clone());
+  }
+
+  action addNode(SpecNode node, integer parentId) {
+    nodes[node.id] := node;
+    nodes[parentId].appendChildren(node.id);
+  }
+
+  action registerFailure(integer id, string text) {
+    string t := "'" + expandContextString(id) + "' failed: " + text;
+    registerResult(id, SpecResult.FAILURE, t);
+  }
+
+  action registerSuccess(integer id) {
+    registerResult(id, SpecResult.SUCCESS, "");
+  }
+
+  action registerSkip(integer id, string text) {
+    string t := "'" + expandContextString(id) + "' skipped: " + text;
+    registerResult(id, SpecResult.SKIP, t);
+  }
+
+  action registerError(integer id, string text) {
+    string t := "'" + expandContextString(id) + "' ERROR: " + text;
+    registerResult(id, SpecResult.ERROR, t);
+  }
+
+  action registerResult(integer id, string status, string text) {
+    // Examples that are ignored or are unreacheable won't be listed
+    // in the complete examples from the SuiteRunner, for completeness,
+    // appending them to that list
+    if examplesOrder.indexOf(id) = -1 then {
+      examplesOrder.append(id);
+    }
+
+    if hasNode(id) then {
+      SpecNode node := getNode(id);
+      node.addResult(status, text);
+    }
+  }
+
+  /*
+   * Actions to keep the results the same while improving how the results
+   * are stored
+   */
+  action expandContextString(integer exampleId) returns string {
+    return " ".join(getContextDescriptionList(exampleId));
+  }
+
+  action getContextDescriptionList(integer exampleId) returns sequence<string> {
+    sequence<string> ctxList := contextsToTexts(nodes[exampleId].ancestorsId);
+    ctxList.append(nodes[exampleId].text);
+    return ctxList;
+  }
+
+  action contextsToTexts(sequence<integer> ctxIds) returns sequence<string> {
+    sequence<string> text := [];
+    integer ctxId;
+    for ctxId in ctxIds {
+      text.append(nodes[ctxId].text);
+    }
+    return text;
+  }
+
 
   // TODO: enable nodes' traversal
 }

@@ -10,7 +10,8 @@ monitor ConsoleReporter {
   }
 
   action handleResult(SuiteResult result) {
-      print "";
+    printConfig(result.config);
+    print "";
     sequence<string> orderedResults := [];
     integer id;
     for id in result.examplesOrder {
@@ -65,6 +66,14 @@ monitor ConsoleReporter {
       nFailures.toString() + " failure(s) | " +
       nErrors.toString() + " error(s)";
     print "";
+  }
+
+  action printConfig(SuiteConfiguration config) {
+    if not config.shouldRandomize() then {
+      print "[WARN] Specs ran in order";
+    } else {
+      print "Random seed: " + config.getRandomSeed().toString();
+    }
   }
 }
 

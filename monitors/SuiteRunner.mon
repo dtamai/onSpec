@@ -1,42 +1,32 @@
 ﻿package org.onspec.internal;
 
-using org.onspec.NewSuite;
 using org.onspec.SuiteConfiguration;
 using org.onspec.SuiteResult;
-using org.onspec.SpecNode;
-using org.onspec.SpecResult;
 
 /**
+ * @private
  * Monitor that manages running specs.
  * @listens NewSuite Runs a new spec suite
  * @listens SuiteConfiguration Configure (optional) how the suite runs
  */
 monitor SuiteRunner {
-  /** @private */
   sequence<integer> specs := [];
-  /** @private */
   dictionary<integer /*id*/, ContextDescription> contexts := {};
-  /** @private */
   dictionary<integer /*id*/, ExampleDescription> examples := {};
-  /** @private */
   SuiteResult suiteResult;
-  /** @private */
   boolean isConfigured := false;
-  /** @private */
   SuiteConfiguration config;
 
   import "TimeFormatPlugin" as time;
-  /** @private */
   float beginTime;
 
-  /** @private */
   action onload() {
     on all SuiteConfiguration():config {
       isConfigured := true;
       handleConfiguration();
     }
 
-    on all NewSuite() {
+    on all org.onspec.NewSuite() {
       if not isConfigured then {
         useDefaultConfiguration();
         // Do not cache configuration
@@ -49,9 +39,9 @@ monitor SuiteRunner {
     }
   }
 
-  /** @private */
   action handleNewSuite() {
     suiteResult := new SuiteResult;
+    suiteResult.config := config;
     suiteResult.nodes[0] := newContextNode(0, "");
 
     route SpecDiscover();
@@ -63,26 +53,17 @@ monitor SuiteRunner {
 
     ContextDescription ctx;
     on all ContextDescription():ctx {
-      contexts[ctx.id] := ctx;
-
       registerContext(ctx);
     }
 
     ExampleDescription ex;
     on all ExampleDescription():ex {
-      examples[ex.id] := ex;
-
       registerExample(ex);
     }
 
     SkippedExampleDescription skip;
     on all SkippedExampleDescription():skip {
       registerSkippedExample(skip);
-    }
-
-    IgnoredExampleDescription ignore;
-    on all IgnoredExampleDescription():ignore {
-      registerIgnoredExample(ignore);
     }
 
     on completed SpecDiscover() {
@@ -106,111 +87,65 @@ monitor SuiteRunner {
 
     Failure f;
     on all Failure():f {
-      registerFailure(f.id,
-          "'" + expandContextString(f.id) + "' failed: " + f.reason);
+      suiteResult.registerFailure(f.id, f.reason);
     }
 
     Success su;
     on all Success():su {
-      registerSuccess(su.id);
+      suiteResult.registerSuccess(su.id);
     }
 
     Skip s;
     on all Skip():s {
-      registerSkip(s.id,
-          "'" + expandContextString(s.id) + "' skipped");
+      suiteResult.registerSkip(s.id, "Suite#skip");
     }
 
     Error e;
     on all Error():e {
-      registerError(e.id,
-          "'" + expandContextString(e.id) + "' ERROR: " + e.reason);
+      suiteResult.registerError(e.id, e.reason);
     }
 
   }
 
   action registerContext(ContextDescription ctx) {
-    suiteResult.nodes[ctx.id] := newContextNode(ctx.id, ctx.text);
-    suiteResult.nodes[ctx.getParentId()].appendChildren(ctx.id);
+    contexts[ctx.id] := ctx;
+    suiteResult.addNode(newContextNode(ctx.id, ctx.text), ctx.getParentId());
   }
 
   action registerExample(ExampleDescription ex) {
-    suiteResult.nodes[ex.id] := newExampleNode(ex.id, ex.text);
-    suiteResult.nodes[ex.getParentId()].appendChildren(ex.id);
+    examples[ex.id] := ex;
+    suiteResult.addNode(newExampleNode(ex.id, ex.text, ex.parentContextsId), ex.getParentId());
   }
 
   action registerSkippedExample(SkippedExampleDescription skip) {
-    suiteResult.nodes[skip.id] := newExampleNode(skip.id, skip.text);
-    registerError(skip.id,
-        "'" + " ".join(contextsToTexts(skip.parentContextsId)) + " " + skip.text + "' " + skip.reason);
+    suiteResult.nodes[skip.id] := newExampleNode(skip.id, skip.text, skip.parentContextsId);
+    suiteResult.registerSkip(skip.id, skip.reason);
   }
 
-  action registerIgnoredExample(IgnoredExampleDescription ignore) {
-    suiteResult.nodes[ignore.id] := newExampleNode(ignore.id, ignore.text);
-    registerSkip(ignore.id,
-        "'" + " ".join(contextsToTexts(ignore.parentContextsId)) + " " + ignore.text + "' ignored");
-  }
-
-  action newExampleNode(integer id, string text) returns SpecNode {
-    SpecNode node := new SpecNode;
+  action newExampleNode(integer id, string text, sequence<integer> ancestorsId)
+  returns org.onspec.SpecNode {
+    org.onspec.SpecNode node := new org.onspec.SpecNode;
     node.id := id;
     node.text := text;
     node.isTerminal := true;
+    node.ancestorsId := ancestorsId;
     return node;
   }
 
-  action newContextNode(integer id, string text) returns SpecNode {
-    SpecNode node := new SpecNode;
+  action newContextNode(integer id, string text)
+  returns org.onspec.SpecNode {
+    org.onspec.SpecNode node := new org.onspec.SpecNode;
     node.id := id;
     node.text := text;
     return node;
   }
 
-  action registerFailure(integer id, string text) {
-    registerResult(id, SpecResult.FAILURE, text);
-  }
-
-  action registerSuccess(integer id) {
-    registerResult(id, SpecResult.SUCCESS, "");
-  }
-
-  action registerSkip(integer id, string text) {
-    registerResult(id, SpecResult.SKIP, text);
-  }
-
-  action registerError(integer id, string text) {
-    registerResult(id, SpecResult.ERROR, text);
-  }
-
-  action registerResult(integer id, string status, string text) {
-
-    if suiteResult.examplesOrder.indexOf(id) = -1 then {
-      suiteResult.examplesOrder.append(id);
-    }
-
-    if suiteResult.hasNode(id) then {
-      SpecNode node := suiteResult.getNode(id);
-      node.addResult(status, text);
-    }
-  }
-
-  /** @private */
   action handleConfiguration() {
-    config := config.merge(config.fromString(config.configString));
-    if config.shouldRandomize() then {
-      if not config.hasRandomSeed() then {
+    if config.shouldRandomize() and not config.hasRandomSeed() then {
         config.setRandomSeed((new RandomGenerator).next());
-        print "Random seed (use the config below to repeat examples order):";
-        print "," + SuiteConfiguration.randomSeedParamName + ":" + config.getRandomSeed().toString();
-      } else {
-        print "Using configured random seed: " + config.getRandomSeed().toString();
-      }
-    } else {
-      print "!! [WARN] Runing specs in order !!";
     }
   }
 
-  /** @private */
   action useDefaultConfiguration() {
     route new SuiteConfiguration;
   }
@@ -219,7 +154,7 @@ monitor SuiteRunner {
   sequence<integer> pendingExamplesId;
   action runExamples() {
     pendingExamplesId := defineExamplesOrder(examples.keys());
-    suiteResult.examplesOrder.appendSequence(pendingExamplesId.clone());
+    suiteResult.defineExamplesOrder(pendingExamplesId);
     runFirstExample();
   }
 
@@ -251,29 +186,6 @@ monitor SuiteRunner {
     }
   }
 
-  /** @private */
-  action expandContextString(integer exampleId) returns string {
-    return " ".join(getContextDescriptionList(exampleId));
-  }
-
-  /** @private */
-  action getContextDescriptionList(integer exampleId) returns sequence<string> {
-    sequence<string> ctxList := contextsToTexts(examples[exampleId].parentContextsId);
-    ctxList.append(examples[exampleId].text);
-    return ctxList;
-  }
-
-  /** @private */
-  action contextsToTexts(sequence<integer> ctxIds) returns sequence<string> {
-    sequence<string> text := [];
-    integer ctxId;
-    for ctxId in ctxIds {
-      text.append(contexts[ctxId].text);
-    }
-    return text;
-  }
-
-  /** @private */
   action endSuite() {
     suiteResult.duration := time.getMicroTime() - beginTime;
     route suiteResult;
@@ -281,36 +193,4 @@ monitor SuiteRunner {
   }
 }
 
-monitor ExampleResultListener {
-  action onload() {
-    RunExample ex;
-    on all RunExample():ex {
-      spawn listenResult(ex.id);
-    }
-  }
-
-  action listenResult(integer id) {
-    org.onspec.Skip s;
-    on org.onspec.Skip():s {
-      route Skip(id);
-    }
-
-    on org.onspec.Success() {
-      route Success(id);
-    }
-
-    org.onspec.Failure f;
-    on all org.onspec.Failure():f {
-      route Failure(id, f.reason);
-    }
-
-    on org.onspec.Done() {
-      enqueue SpecDone(id);
-    }
-
-    on SpecDone(id) {
-      die;
-    }
-  }
-}
 

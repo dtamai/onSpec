@@ -76,13 +76,6 @@ event SkippedExampleDescription {
 }
 
 /** @private */
-event IgnoredExampleDescription {
-  wildcard integer id;
-  wildcard string text;
-  wildcard sequence<integer> parentContextsId;
-}
-
-/** @private */
 event RunExample {
   integer id;
 }
