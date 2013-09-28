@@ -1,7 +1,7 @@
 eventdefinitions/onSpec.mon
 eventdefinitions/SpecNode.mon
-eventdefinitions/SuiteResult.mon
 eventdefinitions/SuiteConfiguration.mon
+eventdefinitions/SuiteResult.mon
 eventdefinitions/internal/Events.mon
 eventdefinitions/Events.mon
 eventdefinitions/SpecReporter.mon
