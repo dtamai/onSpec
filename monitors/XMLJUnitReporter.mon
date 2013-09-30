@@ -1,0 +1,93 @@
+package org.onspec;
+
+monitor XMLJUnitReporter {
+
+	constant string REPORTER_NAME := "xmljunit";
+	constant string CHANNEL := "xmljunit";
+
+	listener resultListener;
+
+	action onload() {
+		SuiteConfiguration config;
+		on all SuiteConfiguration():config {
+			resultListener.quit();
+			if config.getReporter() = REPORTER_NAME then {
+				SuiteResult result;
+				resultListener := on all SuiteResult():result {
+					handleResult(result);
+				}
+			}
+		}
+	}
+
+	action handleResult(SuiteResult result) {
+		emit "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>" to CHANNEL;
+		integer nSkips := result.getSkips().size();
+		integer nErrors := result.getErrors().size();
+		integer nFailures := result.getFailures().size();
+		integer nExamples := result.examplesOrder.size();
+
+		emit "<testsuite" +
+		" " + fmtErrCount(nErrors) +
+		" " + fmtSkipCount(nSkips) +
+		" " + fmtFailureCount(nFailures) +
+		" " + fmtTestsCount(nExamples) +
+		" " + fmtTime(result.duration) +
+		" name=\"onSpec\">" to CHANNEL;
+
+		sequence<SpecNode> skips := result.getSkips();
+		SpecNode node;
+		for node in skips {
+			emit "" +
+				"<testcase time=\"0\" name=\"" + node.text + "\">" +
+				"	<skipped message=\"" + " ".join(node.reasons) + "\"/>" +
+				"</testcase>" to CHANNEL;
+		}
+
+		sequence<SpecNode> errors := result.getErrors();
+		for node in errors {
+			emit "" +
+				"<testcase time=\"0\" name=\"" + node.text + "\">" +
+				"	<error message=\"" + " ".join(node.reasons) + "\"/>" +
+				"</testcase>" to CHANNEL;
+		}
+
+		sequence<SpecNode> failures := result.getFailures();
+		for node in failures {
+			emit "" +
+				"<testcase time=\"0\" name=\"" + node.text + "\">" +
+				"	<failure message=\"" + " ".join(node.reasons) + "\"/>" +
+				"</testcase>" to CHANNEL;
+		}
+
+		sequence<SpecNode> successes := result.getSuccesses();
+		for node in successes {
+			emit "" +
+				"<testcase time=\"0\" name=\"" + node.text + "\"/>" to CHANNEL;
+		}
+
+		emit "</testsuite>" to CHANNEL;
+		emit "done" to "onSpecDone";
+	}
+
+	action fmtErrCount(integer n) returns string {
+		return "errors=\"" + n.toString() + "\"";
+	}
+
+	action fmtSkipCount(integer n) returns string {
+		return "skipped=\"" + n.toString() + "\"";
+	}
+
+	action fmtFailureCount(integer n) returns string {
+		return "failures=\"" + n.toString() + "\"";
+	}
+
+	action fmtTestsCount(integer n) returns string {
+		return "tests=\"" + n.toString() + "\"";
+	}
+
+	action fmtTime(float duration) returns string {
+		return "time=\"" + duration.formatFixed(3) + "\"";
+	}
+}
+
