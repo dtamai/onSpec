@@ -37,6 +37,10 @@ event SuiteResult {
     return filterIn(filterInErrors);
   }
 
+	action getSuccesses() returns sequence<SpecNode> {
+		return filterIn(filterInSuccesses);
+	}
+
   action filterIn(action<SpecNode> returns boolean filter) returns sequence<SpecNode> {
     sequence<SpecNode> result := [];
     SpecNode node;
@@ -60,6 +64,10 @@ event SuiteResult {
   action filterInErrors(SpecNode node) returns boolean {
     return node.results.indexOf(SpecResult.ERROR) > -1;
   }
+
+	action filterInSuccesses(SpecNode node) returns boolean {
+		return node.results.size() = 1 and node.results[0] = ".";
+	}
 
   action defineExamplesOrder(sequence<integer> order) {
     examplesOrder.appendSequence(order.clone());
