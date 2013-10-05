@@ -35,5 +35,39 @@ event SpecNode {
       return "(" + "/".join(results) + ")";
     }
   }
+
+  action summarize() returns SpecNode {
+    if results.size() = 1 then { return self; }
+
+    SpecNode summarized := self.clone();
+    summarized.results := new sequence<string>;
+    summarized.reasons := new sequence<string>;
+    integer i := results.indexOf(SpecResult.ERROR);
+    if i > -1 then {
+      summarized.results.append(SpecResult.ERROR);
+      summarized.reasons.append(reasons[i]);
+      return summarized;
+    }
+    i := results.indexOf(SpecResult.FAILURE);
+    if i > -1 then {
+      summarized.results.append(SpecResult.FAILURE);
+      summarized.reasons.append(reasons[i]);
+      return summarized;
+    }
+    i := results.indexOf(SpecResult.SKIP);
+    if i > -1 then {
+      summarized.results.append(SpecResult.SKIP);
+      summarized.reasons.append(reasons[i]);
+      return summarized;
+    }
+    i := results.indexOf(SpecResult.SUCCESS);
+    if i > -1 then {
+      summarized.results.append(SpecResult.SUCCESS);
+      return summarized;
+    }
+    summarized.results.append(SpecResult.UNKNOWN);
+    summarized.reasons.append("Unkown result");
+    return summarized;
+  }
 }
 

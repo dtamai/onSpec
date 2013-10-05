@@ -1,5 +1,11 @@
 package org.onspec;
 
+event TraverseInterface {
+	action<SpecNode> onEnterContext;
+	action<SpecNode> onLeaveContext;
+	action<SpecNode> onExample;
+}
+
 /**
  * Container for the results of a suite run
  */
@@ -37,6 +43,10 @@ event SuiteResult {
     return filterIn(filterInErrors);
   }
 
+	action getSuccesses() returns sequence<SpecNode> {
+		return filterIn(filterInSuccesses);
+	}
+
   action filterIn(action<SpecNode> returns boolean filter) returns sequence<SpecNode> {
     sequence<SpecNode> result := [];
     SpecNode node;
@@ -60,6 +70,10 @@ event SuiteResult {
   action filterInErrors(SpecNode node) returns boolean {
     return node.results.indexOf(SpecResult.ERROR) > -1;
   }
+
+	action filterInSuccesses(SpecNode node) returns boolean {
+		return node.results.size() = 1 and node.results[0] = ".";
+	}
 
   action defineExamplesOrder(sequence<integer> order) {
     examplesOrder.appendSequence(order.clone());
@@ -126,7 +140,24 @@ event SuiteResult {
     return text;
   }
 
+  action traverse(TraverseInterface interface) {
+    SpecNode root := nodes[0];
+    _traverseContext(root, interface);
+  }
 
-  // TODO: enable nodes' traversal
+  action _traverseContext(SpecNode context, TraverseInterface interface) {
+    interface.onEnterContext(context);
+    SpecNode currNode;
+    integer id;
+    for id in context.childrenId {
+      currNode := nodes[id];
+      if currNode.isTerminal then {
+        interface.onExample(currNode);
+      } else {
+        _traverseContext(currNode, interface);
+      }
+    }
+    interface.onLeaveContext(context);
+  }
 }
 

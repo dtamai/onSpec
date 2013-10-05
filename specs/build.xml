@@ -1,0 +1,22 @@
+<project name="onSpecSpecs">
+
+	<property environment="env"/>
+	<import file="${env.APAMA_HOME}/etc/apama-macros.xml"/>
+
+	<property name="report.file" value="build/onSpec-report.xml"/>
+	<property name="done.file" value="build/onSpec-done"/>
+
+	<target name="run">
+		<delete file="${done.file}" failonerror="false"/>
+		<delete file="${report.file}" failonerror="false"/>
+		<engine-receive file="${done.file}"
+			channels="onSpecDone" suppressBatch="true"/>
+		<engine-receive file="${report.file}"
+			channels="xmljunit" suppressBatch="true"/>
+		<engine-send file="RunSpecsXMLJUnit.evt"/>
+		<waitfor maxwait="5" maxwaitunit="minute" checkevery="500">
+			<length file="${done.file}" length="5" when="ge"/>
+		</waitfor>
+		<kill-correlator/>
+	</target>
+</project>

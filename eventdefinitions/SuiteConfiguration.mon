@@ -15,6 +15,8 @@ event SuiteConfiguration {
   constant string timeoutParamName := "timeout";
   constant float timeoutDefaultValue := 0.2;
 
+  constant string reporterParamName := "reporter";
+
   action hasRandomSeed() returns boolean {
     return hasParam(randomSeedParamName);
   }
@@ -33,6 +35,10 @@ event SuiteConfiguration {
 
   action getTimeout() returns float {
     return getFloatOrElse(timeoutParamName, timeoutDefaultValue);
+  }
+
+  action getReporter() returns string {
+    return config.getOrDefault(reporterParamName);
   }
 
   action hasParam(string param) returns boolean {

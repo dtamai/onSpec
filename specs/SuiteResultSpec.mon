@@ -1,0 +1,125 @@
+package org.onspec;
+
+using org.onspec.expectation.IntegerValue;
+
+monitor SuiteResultSpec {
+	Suite _;
+
+	action onload() {
+		_.init(run);
+	}
+
+	SuiteResult result;
+	integer callCount;
+	sequence<integer> callOrder;
+
+	action run() {
+		on Spec(_.describe("SuiteResult")) {
+			on Spec(_.describe("#traverse")) {
+				on Before() {
+					result := buildResult();
+					callCount := 0;
+					callOrder := new sequence<integer>;
+				}
+
+				on Spec(_.it("sends onEnterContext callback when entering a context")) {
+					TraverseInterface i := TraverseInterface(mockAction, dummyAction, dummyAction);
+
+					result.traverse(i);
+
+					IntegerValue(callCount).mustBe(3);
+					_.done();
+				}
+
+				on Spec(_.it("sends onLeaveContext callback when leaving a context")) {
+					TraverseInterface i := TraverseInterface(dummyAction, mockAction, dummyAction);
+
+					result.traverse(i);
+
+					IntegerValue(callCount).mustBe(3);
+					_.done();
+				}
+
+				on Spec(_.it("sends onExample callback for each example")) {
+					TraverseInterface i := TraverseInterface(dummyAction, dummyAction, mockAction);
+
+					result.traverse(i);
+
+					IntegerValue(callCount).mustBe(5);
+					_.done();
+				}
+
+				on Spec(_.it("completely traverses each context before leaving")) {
+					TraverseInterface i := TraverseInterface(registerId, registerId, registerId);
+
+					result.traverse(i);
+					// E:enter | L:leave | .:example  E  E  .   .   L  E  .   .   L  .   L
+					sequence<integer> expectation := [0, 2, 11, 12, 2, 3, 13, 14, 3, 15, 0];
+
+					integer k := 0; while k < expectation.size() {
+						if expectation[k] != callOrder[k] then {
+							_.fail("Called in unexpected order. Expected: " + expectation.toString() +
+								" Called: " + callOrder.toString());
+							break;
+						}
+						k := k + 1;
+					}
+					_.done();
+				}
+			}
+		}
+	}
+
+	action mockAction(SpecNode n) {
+		callCount := callCount + 1;
+	}
+
+	action dummyAction(SpecNode _) {}
+
+	action registerId(SpecNode n) {
+		callOrder.append(n.id);
+	}
+
+	action buildResult() returns SuiteResult {
+		/* Build a minimal complex result tree
+		|- ctx1:root
+		| \- ctx2
+		| | \- ex1
+		| | \- ex2
+		| \- ctx3
+		| | \- ex3
+		| | \- ex4
+		\ \- ex5
+		*/
+		SuiteResult r := new SuiteResult;
+		dictionary<integer, SpecNode> nodes := {};
+		r.nodes := nodes;
+		SpecNode root := newContext(0);
+		SpecNode ctx2 := newContext(2); root.appendChildren(2);
+		SpecNode ctx3 := newContext(3); root.appendChildren(3);
+
+		SpecNode ex1 := newExample(11); ctx2.appendChildren(11);
+		SpecNode ex2 := newExample(12); ctx2.appendChildren(12);
+		SpecNode ex3 := newExample(13); ctx3.appendChildren(13);
+		SpecNode ex4 := newExample(14); ctx3.appendChildren(14);
+		SpecNode ex5 := newExample(15); root.appendChildren(15);
+		nodes[0] := root; nodes[2] := ctx2; nodes[3] := ctx3;
+		nodes[11] := ex1; nodes[12] := ex2; nodes[13] := ex3; nodes[14] := ex4; nodes[15] := ex5;
+
+		return r;
+	}
+
+	action newContext(integer id) returns SpecNode {
+		SpecNode n := new SpecNode;
+		n.id := id;
+		n.isTerminal := false;
+		return n;
+	}
+
+	action newExample(integer id) returns SpecNode {
+		SpecNode n := new SpecNode;
+		n.id := id;
+		n.isTerminal := true;
+		return n;
+	}
+}
