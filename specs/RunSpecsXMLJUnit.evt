@@ -1,0 +1,3 @@
+org.onspec.SuiteConfiguration("", {"timeout":"0.1", "reporter":"xmljunit"})
+org.onspec.NewSuite()
+

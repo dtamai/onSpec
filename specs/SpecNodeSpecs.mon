@@ -1,0 +1,69 @@
+package org.onspec;
+
+using org.onspec.expectation.IntegerValue;
+using org.onspec.expectation.StringValue;
+
+monitor SpecNodeSpecs {
+  Suite _;
+
+  action onload() {
+    _.init(run);
+  }
+
+  SpecNode node;
+
+  action run() {
+    on Spec(_.describe("SpecNode")) {
+      on Spec(_.describe("#summarize")) {
+        on Spec(_.it("prioritizes: E -> F -> S -> .")) {
+          // to verifiy that SpecNode is following the priorization,
+          // each step appends a new result, in the inverse priorization
+          // order.
+
+          // success doesn't have a reason
+          addSuccess();
+          assertSummary(node.summarize(), SpecResult.SUCCESS, "");
+
+          string reason := "";
+          reason := "skip";
+          addSkip(reason);
+          assertSummary(node.summarize(), SpecResult.SKIP, reason);
+
+          reason := "failure";
+          addFailure(reason);
+          assertSummary(node.summarize(), SpecResult.FAILURE, reason);
+
+          reason := "error";
+          addError(reason);
+          assertSummary(node.summarize(), SpecResult.ERROR, reason);
+
+          _.done();
+        }
+      }
+    }
+  }
+
+  action assertSummary(SpecNode node, string result, string reason) {
+    IntegerValue(node.results.size()).mustBe(1);
+    StringValue(node.results[0]).mustBe(result);
+    IntegerValue(node.reasons.size()).mustBe(1);
+    StringValue(node.reasons[0]).mustBe(reason);
+  }
+
+  action addSuccess() {
+    node.addResult(SpecResult.SUCCESS, "");
+  }
+
+  action addSkip(string reason) {
+    node.addResult(SpecResult.SKIP, reason);
+  }
+
+  action addFailure(string reason) {
+    node.addResult(SpecResult.FAILURE, reason);
+  }
+
+  action addError(string reason) {
+    node.addResult(SpecResult.ERROR, reason);
+  }
+}
+

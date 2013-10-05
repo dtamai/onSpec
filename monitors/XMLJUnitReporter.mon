@@ -1,0 +1,81 @@
+package org.onspec;
+
+monitor XMLJUnitReporter {
+
+	constant string REPORTER_NAME := "xmljunit";
+	constant string CHANNEL := "xmljunit";
+
+	listener resultListener;
+
+	action onload() {
+		SuiteConfiguration config;
+		on all SuiteConfiguration():config {
+			resultListener.quit();
+			if config.getReporter() = REPORTER_NAME then {
+				SuiteResult result;
+				resultListener := on all SuiteResult():result {
+					handleResult(result);
+				}
+			}
+		}
+	}
+
+	action handleResult(SuiteResult result) {
+		emit "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>" to CHANNEL;
+		emit "<testsuites>" to CHANNEL;
+		result.traverse(TraverseInterface(onEnterContext, onLeaveContext, onExample));
+		emit "</testsuites>" to CHANNEL;
+		terminate();
+	}
+
+	integer currDepth;
+	sequence<string> ctxDescr;
+	action onEnterContext(SpecNode ctx) {
+		if ctx.id = 0 then { return; }
+		ctxDescr.append(ctx.text);
+		currDepth := currDepth + 1;
+		emit "<testsuite name=\"" + ": ".join(ctxDescr) + "\" id=\"" + ctx.id.toString() + "\">" to CHANNEL;
+	}
+
+	action onLeaveContext(SpecNode ctx) {
+		if ctx.id = 0 then { return; }
+		currDepth := currDepth - 1;
+		ctxDescr.setSize(currDepth);
+		emit "</testsuite>" to CHANNEL;
+	}
+
+	action onExample(SpecNode ex) {
+		SpecNode summarized := ex.summarize();
+		string status := summarized.getFormattedResult();
+		if status = SpecResult.ERROR then {
+			emitNonSuccess("error", summarized);
+		} else if status = SpecResult.FAILURE then {
+			emitNonSuccess("failure", summarized);
+		} else if status = SpecResult.SKIP then {
+			emitNonSuccess("skip", summarized);
+		} else if status = SpecResult.SUCCESS then {
+			emitSuccess(summarized);
+		} else {
+			emitNonSuccess("error", summarized);
+		}
+	}
+
+	action emitNonSuccess(string status, SpecNode node) {
+		emit "<testcase time=\"0\" name=\"" + node.text + "\">" +
+			"<" + status + " message=\"" + node.reasons[0] + "\"/>" +
+			"</testcase>" to CHANNEL;
+	}
+
+	action emitSuccess(SpecNode node) {
+		emit "<testcase time=\"0\" name=\"" + node.text + "\"/>" to CHANNEL;
+	}
+
+	action terminate() {
+		emit "done" to "onSpecDone";
+	}
+
+	action fmtTime(float duration) returns string {
+		return "time=\"" + duration.formatFixed(3) + "\"";
+	}
+}
+
