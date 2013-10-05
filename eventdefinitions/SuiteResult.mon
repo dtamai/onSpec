@@ -140,24 +140,24 @@ event SuiteResult {
     return text;
   }
 
-  action traverse(TraverseInterface interface) {
+  action traverse(TraverseInterface iface) {
     SpecNode root := nodes[0];
-    _traverseContext(root, interface);
+    _traverseContext(root, iface);
   }
 
-  action _traverseContext(SpecNode context, TraverseInterface interface) {
-    interface.onEnterContext(context);
+  action _traverseContext(SpecNode context, TraverseInterface iface) {
+    iface.onEnterContext(context);
     SpecNode currNode;
     integer id;
     for id in context.childrenId {
       currNode := nodes[id];
       if currNode.isTerminal then {
-        interface.onExample(currNode);
+        iface.onExample(currNode);
       } else {
-        _traverseContext(currNode, interface);
+        _traverseContext(currNode, iface);
       }
     }
-    interface.onLeaveContext(context);
+    iface.onLeaveContext(context);
   }
 }
 
