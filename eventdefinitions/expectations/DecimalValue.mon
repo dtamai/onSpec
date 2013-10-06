@@ -11,14 +11,44 @@ event DecimalValue {
   }
 
   action mustBe(decimal expected) {
+    failIfInfinite(expected);
     if not expected = actual then {
       testFailed(expected, "equal");
     }
   }
 
   action mustNotBe(decimal expected) {
+    failIfInfinite(expected);
     if expected = actual then {
       testFailed(expected, "not equal");
     }
   }
+
+  action mustBeNaN() {
+    if not actual.isNaN() then {
+      org.onspec.SpecReporter().fail(actual.toString() +
+        " expected to be decimal.NAN");
+    }
+  }
+
+  action mustBeFinite() {
+    if not actual.isFinite() then {
+      org.onspec.SpecReporter().fail(actual.toString() +
+        " expected to be finite");
+    }
+  }
+
+  action mustBeInfinite() {
+    if not actual.isInfinite() then {
+      org.onspec.SpecReporter().fail(actual.toString() +
+        " expected to be decimal.INFINITY");
+    }
+  }
+
+  action failIfInfinite(decimal expected) {
+    if actual.isInfinite() or expected.isInfinite() then {
+      org.onspec.SpecReporter().fail("Trying to compare infinite values");
+    }
+  }
 }
+

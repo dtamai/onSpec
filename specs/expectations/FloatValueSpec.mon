@@ -2,6 +2,8 @@ package org.onspec;
 
 using org.onspec.expectation.FloatValue;
 
+event FloatValueSpec_Success {}
+
 monitor FloatValueSpec {
   Suite _;
 
@@ -36,7 +38,94 @@ monitor FloatValueSpec {
         FloatValue(0.001).mustBe(-0.001, 0.1);
         _.done();
       }
+
+      on Spec(_.it("verifies special values")) {
+        FloatValue(float.NAN).mustBeNaN();
+        FloatValue(10.0).mustBeFinite();
+        FloatValue(float.INFINITY).mustBeInfinite();
+        _.done();
+      }
+
+      on Spec(_.it("fails when comparing NaN values")) {
+        spawn testFailComparingNaN to context("isolated");
+        on FloatValueSpec_Success() { _.pass(); }
+      }
+
+      on Spec(_.it("fails when comparing to NaN values")) {
+        spawn testFailComparingToNaN to context("isolated");
+        on FloatValueSpec_Success() { _.pass(); }
+      }
+
+      on Spec(_.it("fails when comparing within NaN values")) {
+        spawn testFailComparingWithinNaN to context("isolated");
+        on FloatValueSpec_Success() { _.pass(); }
+      }
+
+      on Spec(_.it("fails when comparing only NaN values")) {
+        spawn testFailComparingNaNs to context("isolated");
+        on FloatValueSpec_Success() { _.pass(); }
+      }
+
+      on Spec(_.it("fails when comparing infinte values")) {
+        spawn testFailComparingInfinite to context("isolated");
+        on FloatValueSpec_Success() { _.pass(); }
+      }
+
+      on Spec(_.it("fails when comparing to infinite values")) {
+        spawn testFailComparingToInfinite to context("isolated");
+        on FloatValueSpec_Success() { _.pass(); }
+      }
+
+      on Spec(_.it("fails when comparing within intinite values")) {
+        spawn testFailComparingWithinInfinite to context("isolated");
+        on FloatValueSpec_Success() { _.pass(); }
+      }
+
+      on Spec(_.it("fails when comparing only infinite values")) {
+        spawn testFailComparingInfinites to context("isolated");
+        on FloatValueSpec_Success() { _.pass(); }
+      }
     }
+  }
+
+  action testFailComparingNaN() {
+    on Failure() { enqueue FloatValueSpec_Success(); }
+    FloatValue(float.NAN).mustBe(3.14, 0.1);
+  }
+
+  action testFailComparingToNaN() {
+    on Failure() { enqueue FloatValueSpec_Success(); }
+    FloatValue(3.14).mustBe(float.NAN, 0.1);
+  }
+
+  action testFailComparingWithinNaN() {
+    on Failure() { enqueue FloatValueSpec_Success(); }
+    FloatValue(3.14).mustBe(3.14, float.NAN);
+  }
+
+  action testFailComparingNaNs() {
+    on Failure() { enqueue FloatValueSpec_Success(); }
+    FloatValue(float.NAN).mustBe(float.NAN, 0.1);
+  }
+
+  action testFailComparingInfinite() {
+    on Failure() { enqueue FloatValueSpec_Success(); }
+    FloatValue(float.INFINITY).mustBe(3.14, 0.1);
+  }
+
+  action testFailComparingToInfinite() {
+    on Failure() { enqueue FloatValueSpec_Success(); }
+    FloatValue(3.14).mustBe(float.INFINITY, 0.1);
+  }
+
+  action testFailComparingWithinInfinite() {
+    on Failure() { enqueue FloatValueSpec_Success(); }
+    FloatValue(3.14).mustBe(3.14, float.INFINITY);
+  }
+
+  action testFailComparingInfinites() {
+    on Failure() { enqueue FloatValueSpec_Success(); }
+    FloatValue(float.INFINITY).mustBe(float.INFINITY, 0.1);
   }
 
 }
