@@ -30,4 +30,25 @@ event FloatValue {
       testFailed(expected, delta, "not equal");
     }
   }
+
+  action mustBeNaN() {
+    if not actual.isNaN() then {
+      org.onspec.SpecReporter().fail(actual.toString() +
+        " expected to be float.NAN");
+    }
+  }
+
+  action mustBeFinite() {
+    if not actual.isFinite() then {
+      org.onspec.SpecReporter().fail(actual.toString() +
+        " expected to be finite");
+    }
+  }
+
+  action mustBeInfinite() {
+    if not actual.isInfinite() then {
+      org.onspec.SpecReporter().fail(actual.toString() +
+        " expected to be float.INFINITY");
+    }
+  }
 }

@@ -36,6 +36,13 @@ monitor FloatValueSpec {
         FloatValue(0.001).mustBe(-0.001, 0.1);
         _.done();
       }
+
+      on Spec(_.it("verifies special values")) {
+        FloatValue(float.NAN).mustBeNaN();
+        FloatValue(10.0).mustBeFinite();
+        FloatValue(float.INFINITY).mustBeInfinite();
+        _.done();
+      }
     }
   }
 
