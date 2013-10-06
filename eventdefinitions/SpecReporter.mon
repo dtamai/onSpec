@@ -18,12 +18,21 @@ event Done {
 }
 
 /**
-* Event object that reports the result of examples.
-* onSpec verifications can be extended using this event, it is important to
-* note that each action terminates the current example, so there can be
-* multiple verifications using conditional failures and a final success
-* that will be sent only if no failure had been sent.
-*/
+ * Event object that reports the result of examples.
+ *
+ * onSpec verifications can be extended using this event, it is important to
+ * note that some actions terminates the current example, so there can be
+ * multiple verifications using conditional failures and a final success
+ * that will be sent only if no failure had been sent.
+ *
+ * In the examples context, terminate means "allow the example to terminate".
+ * It is not possible to interrupt the execution of the it block, so one single
+ * example can fail many times and still end by calling SpecReporter#done, which
+ * is one form of success, that example will be recorded as both a failure and
+ * a success; it is up to the final suite reporter to decide.
+ *
+ * This may be the desired behavior, since it is not possible to interrupt code.
+ */
 event SpecReporter {
 
   /**
@@ -31,7 +40,7 @@ event SpecReporter {
    * It should be used inside a listener block of an asynchronous spec.
    * It terminates the current example.
    */
-  action pass() {
+  action passAndTerminate() {
     route Success();
     done();
   }
@@ -41,9 +50,19 @@ event SpecReporter {
    * It should be used inside a listener block of an asynchronous spec.
    * It terminates the current example.
    */
-  action fail(string reason) {
+  action failAndTerminate(string reason) {
     route Failure(reason);
     done();
+  }
+
+  /**
+   * Notifies that an assertion failed.
+   * It should be used when there can be many failures (e.g. asserting many
+   * values in a sequence).
+   * It does not terminate the current example.
+   */
+  action fail(string reason) {
+    route Failure(reason);
   }
 
   /**
@@ -51,7 +70,7 @@ event SpecReporter {
    * Skipped examples are verbosely reported at the end of the specs.
    * It terminates the current example.
    */
-  action skip() {
+  action skipAndTerminate() {
     route Skip();
     done();
   }

@@ -94,7 +94,7 @@ event Suite {
    * It terminates the current example.
    */
   action pass() {
-    _reporter.pass();
+    _reporter.passAndTerminate();
   }
 
   /**
@@ -103,7 +103,7 @@ event Suite {
    * It terminates the current example.
    */
   action skip() {
-    _reporter.skip();
+    _reporter.skipAndTerminate();
   }
 
   /**
@@ -112,7 +112,7 @@ event Suite {
    * It terminates the current example.
    */
   action fail(string reason) {
-    _reporter.fail(reason);
+    _reporter.failAndTerminate(reason);
   }
 
   /**
@@ -120,7 +120,7 @@ event Suite {
    * It should be used to terminate a synchronous spec.
    */
   action done() {
-    _reporter.pass();
+    _reporter.passAndTerminate();
   }
 
   /**

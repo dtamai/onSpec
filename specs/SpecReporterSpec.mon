@@ -1,6 +1,7 @@
 package org.onspec;
 
 event SpecReporterSpec_Passed {}
+event SpecReporterSpec_NotDone {}
 monitor SpecReporterSpec {
 
   Suite _;
@@ -25,8 +26,15 @@ monitor SpecReporterSpec {
         }
       }
 
-      on Spec(_.it("terminates after failure")) {
+      on Spec(_.it("terminates after failure (async)")) {
         spawn testFailThenTerminate to context("isolated");
+        on SpecReporterSpec_Passed() {
+          _.pass();
+        }
+      }
+
+      on Spec(_.it("does not terminate after failure (sync)")) {
+        spawn testFailAndContinue to context("isolated");
         on SpecReporterSpec_Passed() {
           _.pass();
         }
@@ -50,7 +58,7 @@ monitor SpecReporterSpec {
   action testSuccessThenTerminate() {
     on Success() -> Done() { enqueue SpecReporterSpec_Passed(); }
 
-    SpecReporter().pass();
+    SpecReporter().passAndTerminate();
   }
 
   action testFailThenTerminate() {
@@ -62,12 +70,25 @@ monitor SpecReporterSpec {
       }
     }
 
+    SpecReporter().failAndTerminate(reason);
+  }
+
+  action testFailAndContinue() {
+    string reason := "SpecReporterSpec failed";
+    Failure f;
+    on (Failure():f -> SpecReporterSpec_NotDone()) and not Done() {
+      if f.reason = reason then {
+        enqueue SpecReporterSpec_Passed();
+      }
+    }
+
     SpecReporter().fail(reason);
+    route SpecReporterSpec_NotDone();
   }
 
   action testSkipThenTerminate() {
     on Skip() -> Done() { enqueue SpecReporterSpec_Passed(); }
 
-    SpecReporter().skip();
+    SpecReporter().skipAndTerminate();
   }
 }
