@@ -39,6 +39,9 @@ event SpecRunnerRepeater {
     return -1;
   }
 
+  action addInfo(string text) {
+  }
+
   action addConfig(string config) {
   }
 

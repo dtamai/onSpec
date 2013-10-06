@@ -12,6 +12,7 @@ event SpecRunner {
   action<string> returns integer addContext;
   action<string> returns integer addSpec;
   action<string> returns integer ignoreSpec;
+  action<string> addInfo;
   action<string> addConfig;
   // =========================================
 
@@ -40,6 +41,7 @@ event SpecRunner {
 
     addContext := recorder.addContext;
     addSpec := recorder.addSpec;
+    addInfo := recorder.addInfo;
     addConfig := recorder.addConfig;
     ignoreSpec := recorder.ignoreSpec;
   }
@@ -69,6 +71,7 @@ event SpecRunner {
 
     addContext := repeater.addContext;
     addSpec := repeater.addSpec;
+    addInfo := repeater.addInfo;
     addConfig := repeater.addConfig;
     ignoreSpec := repeater.ignoreSpec;
   }

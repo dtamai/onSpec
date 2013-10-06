@@ -54,6 +54,16 @@ event Suite {
   }
 
   /**
+   * Add some text to an example.
+   * It should be used to add relevant information to the example, like
+   * a more verbose explanation of the context.
+   * @param text Extra information
+   */
+  action info(string text) {
+    _runner.addInfo(text);
+  }
+
+  /**
    * Customize the configuration for the next context/example declared.
    * If before a context, the configuration applies to every example inside
    * that context.

@@ -45,6 +45,9 @@ event SpecRunnerRecorder {
     return id;
   }
 
+  action addInfo(string text) {
+  }
+
   action addConfig(string configString) {
     nextConfig := nextConfig.fromString(configString);
   }
