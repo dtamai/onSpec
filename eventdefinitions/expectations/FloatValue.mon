@@ -20,12 +20,14 @@ event FloatValue {
   }
 
   action mustBe(float expected, float delta) {
+    failIfIntinite(expected, delta);
     if not _withinDelta(expected, delta) then {
       testFailed(expected, delta, "equal");
     }
   }
 
   action mustNotBe(float expected, float delta) {
+    failIfIntinite(expected, delta);
     if _withinDelta(expected, delta) then {
       testFailed(expected, delta, "not equal");
     }
@@ -49,6 +51,15 @@ event FloatValue {
     if not actual.isInfinite() then {
       org.onspec.SpecReporter().fail(actual.toString() +
         " expected to be float.INFINITY");
+    }
+  }
+
+  action failIfIntinite(float expected, float delta) {
+    if actual.isInfinite() or expected.isInfinite() then {
+      org.onspec.SpecReporter().fail("Trying to compare infinite values");
+    }
+    if delta.isInfinite() then {
+      org.onspec.SpecReporter().fail("Trying to compara within infinite");
     }
   }
 }

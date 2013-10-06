@@ -2,6 +2,8 @@ package org.onspec;
 
 using org.onspec.expectation.DecimalValue;
 
+event DecimalValueSpec_Success {}
+
 monitor DecimalValueSpec {
   Suite _;
 
@@ -22,6 +24,73 @@ monitor DecimalValueSpec {
         DecimalValue(-2.d).mustNotBe(3.d);
         _.done();
       }
+
+      on Spec(_.it("verifies special values")) {
+        DecimalValue(decimal.NAN).mustBeNaN();
+        DecimalValue(10.0d).mustBeFinite();
+        DecimalValue(decimal.INFINITY).mustBeInfinite();
+        _.done();
+      }
+
+      on Spec(_.it("fails when comparing NaN values")) {
+        spawn testFailComparingNaN to context("isolated");
+        on DecimalValueSpec_Success() { _.pass(); }
+      }
+
+      on Spec(_.it("fails when comparing to NaN values")) {
+        spawn testFailComparingToNaN to context("isolated");
+        on DecimalValueSpec_Success() { _.pass(); }
+      }
+
+      on Spec(_.it("fails when comparing only NaN values")) {
+        spawn testFailComparingNaNs to context("isolated");
+        on DecimalValueSpec_Success() { _.pass(); }
+      }
+
+      on Spec(_.it("fails when comparing infinte values")) {
+        spawn testFailComparingInfinite to context("isolated");
+        on DecimalValueSpec_Success() { _.pass(); }
+      }
+
+      on Spec(_.it("fails when comparing to infinite values")) {
+        spawn testFailComparingToInfinite to context("isolated");
+        on DecimalValueSpec_Success() { _.pass(); }
+      }
+
+      on Spec(_.it("fails when comparing only infinite values")) {
+        spawn testFailComparingInfinites to context("isolated");
+        on DecimalValueSpec_Success() { _.pass(); }
+      }
     }
+  }
+
+  action testFailComparingNaN() {
+    on Failure() { enqueue DecimalValueSpec_Success(); }
+    DecimalValue(decimal.NAN).mustBe(3.14d);
+  }
+
+  action testFailComparingToNaN() {
+    on Failure() { enqueue DecimalValueSpec_Success(); }
+    DecimalValue(3.14d).mustBe(decimal.NAN);
+  }
+
+  action testFailComparingNaNs() {
+    on Failure() { enqueue DecimalValueSpec_Success(); }
+    DecimalValue(decimal.NAN).mustBe(decimal.NAN);
+  }
+
+  action testFailComparingInfinite() {
+    on Failure() { enqueue DecimalValueSpec_Success(); }
+    DecimalValue(decimal.INFINITY).mustBe(3.14d);
+  }
+
+  action testFailComparingToInfinite() {
+    on Failure() { enqueue DecimalValueSpec_Success(); }
+    DecimalValue(3.14d).mustBe(decimal.INFINITY);
+  }
+
+  action testFailComparingInfinites() {
+    on Failure() { enqueue DecimalValueSpec_Success(); }
+    DecimalValue(decimal.INFINITY).mustBe(decimal.INFINITY);
   }
 }
