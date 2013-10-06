@@ -102,7 +102,7 @@ event SpecRunner {
     on completed Before() {
       route Spec(example.id);
       on wait (example.config.getTimeout()) and not SpecDone(example.id) {
-        org.onspec.SpecReporter().fail("timeout");
+        org.onspec.SpecReporter().failAndTerminate("timeout");
       }
       on SpecDone(example.id) {
         route After();
