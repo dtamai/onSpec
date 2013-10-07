@@ -40,6 +40,7 @@ event SpecRunnerRepeater {
   }
 
   action addInfo(string text) {
+    route org.onspec.ExtraInfo(text);
   }
 
   action addConfig(string config) {

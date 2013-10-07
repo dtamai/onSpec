@@ -17,6 +17,11 @@ event Skip {
 event Done {
 }
 
+/** @private */
+event ExtraInfo {
+  wildcard string text;
+}
+
 /**
  * Event object that reports the result of examples.
  *

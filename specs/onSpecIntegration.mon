@@ -68,6 +68,7 @@ monitor onSpecSample {
       }
 
       on Spec($.it("is like an older brother for the example above")) {
+        $.info("sneaking into old specs");
         $.pass();
       }
     }
@@ -137,6 +138,14 @@ monitor onSpecSample2 {
         on Spec(_.it("skips the second to run")) {
           _.done();
         }
+      }
+    }
+
+    on Spec(_.describe("Suite#info")) {
+      on Spec(_.it("is recorded in the result")) {
+        _.info("tis better be important!");
+        _.info("or not");
+        _.done();
       }
     }
   }

@@ -105,6 +105,11 @@ monitor SuiteRunner {
       suiteResult.registerError(e.id, e.reason);
     }
 
+    ExtraInfo xInfo;
+    on all ExtraInfo():xInfo {
+      suiteResult.appendInfo(xInfo.id, xInfo.text);
+    }
+
   }
 
   action registerContext(ContextDescription ctx) {

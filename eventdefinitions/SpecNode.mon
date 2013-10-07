@@ -11,6 +11,7 @@ event SpecResult {
 event SpecNode {
   wildcard integer id;
   wildcard string text;
+  wildcard sequence<string> extraInfo;
   wildcard boolean isTerminal;
 
   // valid if is a context (isTerminal = false)
@@ -22,6 +23,7 @@ event SpecNode {
   wildcard sequence<string> reasons;
 
   action appendChildren(integer id) { childrenId.append(id); }
+  action appendInfo(string info) { extraInfo.append(info); }
 
   action addResult(string result, string reason) {
     results.append(result);

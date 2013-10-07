@@ -102,3 +102,9 @@ event Error {
   wildcard string reason;
 }
 
+/** @private */
+event ExtraInfo {
+  wildcard integer id;
+  wildcard string text;
+}
+

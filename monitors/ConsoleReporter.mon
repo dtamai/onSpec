@@ -21,6 +21,13 @@ monitor ConsoleReporter {
     sequence<string> r;
     SpecNode node;
 
+    for node in result.nodes.values() {
+      if node.extraInfo.size() > 0 then {
+        print result.expandContextString(node.id) + "\n  -- " + "\n  -- ".join(node.extraInfo);
+      }
+    }
+    print "";
+
     for node in result.getSkips() {
       temp.append(node.reasons);
     }
