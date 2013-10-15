@@ -117,6 +117,13 @@ event SuiteResult {
     }
   }
 
+  action registerDuration(integer id, float duration) {
+    if hasNode(id) then {
+      SpecNode node := getNode(id);
+      node.duration := duration;
+    }
+  }
+
   /*
    * Actions to keep the results the same while improving how the results
    * are stored

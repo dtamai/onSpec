@@ -20,6 +20,7 @@ event SpecNode {
   wildcard sequence<integer> ancestorsId;
   wildcard sequence<string> results;
   wildcard sequence<string> reasons;
+  wildcard float duration;
 
   action appendChildren(integer id) { childrenId.append(id); }
 
