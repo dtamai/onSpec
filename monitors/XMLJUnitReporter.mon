@@ -61,13 +61,15 @@ monitor XMLJUnitReporter {
 	}
 
 	action emitNonSuccess(string status, SpecNode node) {
-		emit "<testcase time=\"0\" name=\"" + node.text + "\">" +
+		emit "<testcase time=\"" + node.duration.formatFixed(3) +
+			"\" name=\"" + node.text + "\">" +
 			"<" + status + " message=\"" + node.reasons[0] + "\"/>" +
 			"</testcase>" to CHANNEL;
 	}
 
 	action emitSuccess(SpecNode node) {
-		emit "<testcase time=\"0\" name=\"" + node.text + "\"/>" to CHANNEL;
+		emit "<testcase time=\"" + node.duration.formatFixed(3) +
+			"\" name=\"" + node.text + "\"/>" to CHANNEL;
 	}
 
 	action terminate() {
