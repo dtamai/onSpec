@@ -1,6 +1,6 @@
 package org.onspec;
 
 event onSpec {
-  constant string version := "0.5.1";
+  constant string version := "0.5.2";
 }
 
