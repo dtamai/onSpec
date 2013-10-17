@@ -40,9 +40,7 @@ monitor SuiteRunner {
   }
 
   action handleNewSuite() {
-    suiteResult := new SuiteResult;
-    suiteResult.config := config;
-    suiteResult.nodes[0] := newContextNode(0, "");
+    suiteResult.init(config);
 
     route SpecDiscover();
 
@@ -118,7 +116,10 @@ monitor SuiteRunner {
   }
 
   action registerSkippedExample(SkippedExampleDescription skip) {
-    suiteResult.nodes[skip.id] := newExampleNode(skip.id, skip.text, skip.parentContextsId);
+    suiteResult.addNode(
+      newExampleNode(skip.id, skip.text, skip.parentContextsId),
+      SuiteResult.ORPHANS_CTX_ID
+    );
     suiteResult.registerSkip(skip.id, skip.reason);
   }
 

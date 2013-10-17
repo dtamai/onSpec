@@ -11,6 +11,9 @@ event TraverseInterface {
  */
 event SuiteResult {
 
+  constant integer ROOT_CTX_ID := 0;
+  constant integer ORPHANS_CTX_ID := -2;
+
   wildcard sequence<integer /*exampleId*/> examplesOrder;
 
   wildcard dictionary<integer /*nodeId*/, SpecNode> nodes;
@@ -18,6 +21,19 @@ event SuiteResult {
   wildcard float duration;
 
   wildcard SuiteConfiguration config;
+
+  action init(SuiteConfiguration config) {
+    self.config := config;
+    nodes[ROOT_CTX_ID] := _newContextNode(ROOT_CTX_ID, "root");
+    nodes[ORPHANS_CTX_ID] := _newContextNode(ORPHANS_CTX_ID, "orphans");
+  }
+
+  action _newContextNode(integer id, string text) returns SpecNode {
+    SpecNode node := new SpecNode;
+    node.id := id;
+    node.text := text;
+    return node;
+  }
 
   action getNode(integer nodeId) returns SpecNode {
     return nodes[nodeId];
@@ -148,8 +164,11 @@ event SuiteResult {
   }
 
   action traverse(TraverseInterface iface) {
-    SpecNode root := nodes[0];
+    SpecNode root := nodes[ROOT_CTX_ID];
     _traverseContext(root, iface);
+
+    SpecNode orphans := nodes[ORPHANS_CTX_ID];
+    _traverseContext(orphans, iface);
   }
 
   action _traverseContext(SpecNode context, TraverseInterface iface) {
