@@ -52,7 +52,7 @@ monitor XMLJUnitReporter {
 		} else if status = SpecResult.FAILURE then {
 			emitNonSuccess("failure", summarized);
 		} else if status = SpecResult.SKIP then {
-			emitNonSuccess("skip", summarized);
+			emitNonSuccess("skipped", summarized);
 		} else if status = SpecResult.SUCCESS then {
 			emitSuccess(summarized);
 		} else {
