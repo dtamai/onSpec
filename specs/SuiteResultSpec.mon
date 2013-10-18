@@ -27,7 +27,7 @@ monitor SuiteResultSpec {
 
 					result.traverse(i);
 
-					IntegerValue(callCount).mustBe(3);
+					IntegerValue(callCount).mustBe(4);
 					_.done();
 				}
 
@@ -36,7 +36,7 @@ monitor SuiteResultSpec {
 
 					result.traverse(i);
 
-					IntegerValue(callCount).mustBe(3);
+					IntegerValue(callCount).mustBe(4);
 					_.done();
 				}
 
@@ -53,16 +53,24 @@ monitor SuiteResultSpec {
 					TraverseInterface i := TraverseInterface(registerId, registerId, registerId);
 
 					result.traverse(i);
-					// E:enter | L:leave | .:example  E  E  .   .   L  E  .   .   L  .   L
-					sequence<integer> expectation := [0, 2, 11, 12, 2, 3, 13, 14, 3, 15, 0];
+					// E:enter | L:leave | .:example  E  E  .   .   L  E  .   .   L  .   L   E   L
+					sequence<integer> expectation := [0, 2, 11, 12, 2, 3, 13, 14, 3, 15, 0, -2, -2];
 
-					integer k := 0; while k < expectation.size() {
-						if expectation[k] != callOrder[k] then {
-							_.fail("Called in unexpected order. Expected: " + expectation.toString() +
-								" Called: " + callOrder.toString());
-							break;
-						}
+					integer eSize := expectation.size();
+					integer cSize := callOrder.size();
+					if eSize != cSize then {
+						_.fail("Not called as many times as expected. Expected: " + eSize.toString() +
+							" Called: " + cSize.toString());
+					} else {
+						integer k := 0;
+						while k < eSize {
+							if expectation[k] != callOrder[k] then {
+								_.fail("Called in unexpected order. Expected: " + expectation.toString() +
+									" Called: " + callOrder.toString());
+								break;
+							}
 						k := k + 1;
+						}
 					}
 					_.done();
 				}
@@ -82,7 +90,7 @@ monitor SuiteResultSpec {
 
 	action buildResult() returns SuiteResult {
 		/* Build a minimal complex result tree
-		|- ctx1:root
+		|- root:ctx1
 		| \- ctx2
 		| | \- ex1
 		| | \- ex2
@@ -90,21 +98,19 @@ monitor SuiteResultSpec {
 		| | \- ex3
 		| | \- ex4
 		\ \- ex5
+		\- orphans:ctxn2
 		*/
 		SuiteResult r := new SuiteResult;
-		dictionary<integer, SpecNode> nodes := {};
-		r.nodes := nodes;
-		SpecNode root := newContext(0);
-		SpecNode ctx2 := newContext(2); root.appendChildren(2);
-		SpecNode ctx3 := newContext(3); root.appendChildren(3);
+		r.init(new SuiteConfiguration);
+		SpecNode root := r.nodes[SuiteResult.ROOT_CTX_ID];
+		SpecNode ctx2 := newContext(2); r.addNode(ctx2, root.id);
+		SpecNode ctx3 := newContext(3); r.addNode(ctx3, root.id);
 
-		SpecNode ex1 := newExample(11); ctx2.appendChildren(11);
-		SpecNode ex2 := newExample(12); ctx2.appendChildren(12);
-		SpecNode ex3 := newExample(13); ctx3.appendChildren(13);
-		SpecNode ex4 := newExample(14); ctx3.appendChildren(14);
-		SpecNode ex5 := newExample(15); root.appendChildren(15);
-		nodes[0] := root; nodes[2] := ctx2; nodes[3] := ctx3;
-		nodes[11] := ex1; nodes[12] := ex2; nodes[13] := ex3; nodes[14] := ex4; nodes[15] := ex5;
+		SpecNode ex1 := newExample(11); r.addNode(ex1, ctx2.id);
+		SpecNode ex2 := newExample(12); r.addNode(ex2, ctx2.id);
+		SpecNode ex3 := newExample(13); r.addNode(ex3, ctx3.id);
+		SpecNode ex4 := newExample(14); r.addNode(ex4, ctx3.id);
+		SpecNode ex5 := newExample(15); r.addNode(ex5, root.id);
 
 		return r;
 	}

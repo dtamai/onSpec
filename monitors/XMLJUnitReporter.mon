@@ -52,7 +52,7 @@ monitor XMLJUnitReporter {
 		} else if status = SpecResult.FAILURE then {
 			emitNonSuccess("failure", summarized);
 		} else if status = SpecResult.SKIP then {
-			emitNonSuccess("skip", summarized);
+			emitNonSuccess("skipped", summarized);
 		} else if status = SpecResult.SUCCESS then {
 			emitSuccess(summarized);
 		} else {
@@ -61,15 +61,14 @@ monitor XMLJUnitReporter {
 	}
 
 	action emitNonSuccess(string status, SpecNode node) {
-		emit "<testcase time=\"" + node.duration.formatFixed(3) +
-			"\" name=\"" + node.text + "\">" +
+		emit "<testcase" + fmtTime(node.duration) + " name=\"" + node.text + "\">" +
 			"<" + status + " message=\"" + node.reasons[0] + "\"/>" +
 			"</testcase>" to CHANNEL;
 	}
 
 	action emitSuccess(SpecNode node) {
-		emit "<testcase time=\"" + node.duration.formatFixed(3) +
-			"\" name=\"" + node.text + "\"/>" to CHANNEL;
+		emit "<testcase" + fmtTime(node.duration) +
+		" name=\"" + node.text + "\"/>" to CHANNEL;
 	}
 
 	action terminate() {
@@ -77,7 +76,7 @@ monitor XMLJUnitReporter {
 	}
 
 	action fmtTime(float duration) returns string {
-		return "time=\"" + duration.formatFixed(3) + "\"";
+		return " time=\"" + duration.formatFixed(3) + "\"";
 	}
 }
 
