@@ -46,6 +46,15 @@ event SpecReporter {
   }
 
   /**
+   * Alias for #passAndTerminate
+   * There is no need to pass and not terminate. Examples are passing until
+   * they fail.
+   */
+  action pass() {
+    passAndTerminate();
+  }
+
+  /**
    * Notifies that the example was not successful.
    * It should be used inside a listener block of an asynchronous spec.
    * It terminates the current example.
@@ -73,6 +82,14 @@ event SpecReporter {
   action skipAndTerminate() {
     route Skip();
     done();
+  }
+
+  /**
+   * Alias for #skipAndTerminate
+   * Skip and continue doesn't make sense.
+   */
+  action skip() {
+    skipAndTerminate();
   }
 
   /**
